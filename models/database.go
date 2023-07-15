@@ -2,11 +2,11 @@
 package models
 
 import (
-	"errors"
 	"fmt"
-	"strings"
+	"reflect"
 
 	"github.com/Mahmoud-Emad/envserver/internal"
+	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -23,11 +23,7 @@ func NewDatabase() Database {
 
 // Connect connects to database server.
 func (d *Database) Connect(dbConfig internal.DatabaseConfiguration) error {
-	err := d.InvalidDBConfigErr(dbConfig)
-	if err != nil {
-		return err
-	}
-
+	log.Info().Msg("Connecting to the database.")
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
 
@@ -38,15 +34,25 @@ func (d *Database) Connect(dbConfig internal.DatabaseConfiguration) error {
 	}
 
 	d.db = gormDB
+	log.Info().Msg("Database Connected.")
 	return nil
 }
 
-// Migrate migrates db schema
+// Migrate migrates the database schema.
 func (d *Database) Migrate() error {
-	err := d.db.AutoMigrate(&User{}, &Project{}, &EnvironmentKey{})
-	if err != nil {
-		return err
+	tables := []interface{}{&User{}, &Project{}, &EnvironmentKey{}}
+
+	log.Info().Msg("Database migration started")
+	for _, table := range tables {
+		tableName := reflect.TypeOf(table).Elem().Name()
+		log.Info().Msgf("Migrating table: %s", tableName)
+		if err := d.db.AutoMigrate(table); err != nil {
+			log.Error().Msgf("failed to migrate table %s: %q", tableName, err)
+			return err
+		}
 	}
+
+	log.Info().Msg("Database migration completed")
 	return nil
 }
 
@@ -108,16 +114,4 @@ func (d *Database) GetEnvKeyByKeyName(keyName string) (EnvironmentKey, error) {
 	var env EnvironmentKey
 	query := d.db.First(&env, "key = ?", keyName)
 	return env, query.Error
-}
-
-// Validate the database config if empty or has values.
-func (d *Database) InvalidDBConfigErr(dbConfig internal.DatabaseConfiguration) error {
-	if strings.TrimSpace(dbConfig.Host) == "" ||
-		dbConfig.Port == 0 ||
-		strings.TrimSpace(dbConfig.User) == "" ||
-		strings.TrimSpace(dbConfig.Password) == "" ||
-		strings.TrimSpace(dbConfig.Name) == "" {
-		return errors.New("invalid database configuration")
-	}
-	return nil
 }
