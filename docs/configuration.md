@@ -15,6 +15,7 @@ password = "<database_password>"
 name = "<database_name>"
 
 [server]
+host = <server_host>
 port = <server_port>
 ```
 
@@ -25,6 +26,7 @@ Replace the placeholder values `<database_host>`, `<database_port>`, `<database_
 - `<database_user>`         : Replace with the username for accessing your database (e.g., "postgres").
 - `<database_password>`     : Replace with the password for accessing your database (e.g., "postgres").
 - `<database_name>`         : Replace with the name of your database (e.g., "postgres").
+- `<server_host>`           : Replace with the host address of your server (e.g., "localhost").
 - `<server_port>`           : Replace with the desired port number for your server (e.g., 8080).
 
 Make sure to save the config.toml file after updating the values.
