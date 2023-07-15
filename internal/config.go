@@ -30,7 +30,11 @@ func ReadConfigFromFile(path string) (Configuration, error) {
 	config := Configuration{}
 	_, err := toml.DecodeFile(path, &config)
 	if err != nil {
-		return Configuration{}, fmt.Errorf("failed to open config file: %w", err)
+		return Configuration{}, cantLoadConfigFileError
+	}
+	err = config.validateConfiguration()
+	if err != nil {
+		return Configuration{}, err
 	}
 	return config, nil
 }
@@ -45,7 +49,7 @@ func ReadConfigFromReader(r io.Reader) (Configuration, error) {
 	config := Configuration{}
 	_, err := toml.DecodeReader(r, &config)
 	if err != nil {
-		return Configuration{}, fmt.Errorf("failed to decode config from reader: %w", err)
+		return Configuration{}, cantDecodeConfigError
 	}
 	err = config.validateConfiguration()
 	if err != nil {

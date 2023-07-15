@@ -14,8 +14,11 @@ var (
 	databaseNameKeyError     = errors.New("The database name key is missing in the config file.")
 	databaseUserKeyError     = errors.New("The database user key is missing in the config file.")
 	databasePasswordKeyError = errors.New("The database password key is missing in the config file.")
-	InternalServerError      = errors.New("Something went wrong")
-	UserEmailNotUniqueError  = errors.New("The user email field must be unique.")
+	cantLoadConfigFileError  = errors.New("Failed to open config file.")
+	cantDecodeConfigError    = errors.New("Failed to decode config from reader.")
+
+	InternalServerError     = errors.New("Something went wrong")
+	UserEmailNotUniqueError = errors.New("The user email field must be unique.")
 )
 
 // Check all required fields then return an error if there.
