@@ -3,6 +3,7 @@ module github.com/Mahmoud-Emad/envserver
 go 1.20
 
 require (
+	github.com/gorilla/mux v1.8.0
 	github.com/rs/zerolog v1.29.1
 	gorm.io/gorm v1.25.0
 )

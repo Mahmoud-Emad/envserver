@@ -21,6 +21,7 @@ type ErrorDetails struct {
 }
 
 type ResponeError error
+type Handler func(w http.ResponseWriter, r *http.Request)
 
 func sendJSONResponse(w http.ResponseWriter, status int, message string, data interface{}, err error) {
 
@@ -41,4 +42,12 @@ func sendJSONResponse(w http.ResponseWriter, status int, message string, data in
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(response)
+}
+
+// Used for debugging, print out the incoming request URL and its method.
+func wrapRequest(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Debug().Msgf("Request: %s %s", r.Method, r.URL.Path)
+		h(w, r)
+	}
 }

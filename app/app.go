@@ -10,6 +10,7 @@ import (
 
 	internal "github.com/Mahmoud-Emad/envserver/internal"
 	models "github.com/Mahmoud-Emad/envserver/models"
+	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -94,5 +95,24 @@ func (a *App) Start() {
 
 // registerHandlers registers all handlers with their respective paths in the HTTP router of this application's
 func (a *App) registerHandlers() {
-	http.HandleFunc("/api/v1/users/", a.createUserHandler)
+	r := mux.NewRouter()
+	apiRouter := r.PathPrefix("/api/v1").Subrouter()
+	userRouter := apiRouter.PathPrefix("/users").Subrouter()
+
+	userRouter.HandleFunc(
+		"",
+		wrapRequest(a.createUserHandler),
+	).Methods(
+		http.MethodPost,
+		http.MethodOptions,
+	)
+	userRouter.HandleFunc(
+		"",
+		wrapRequest(a.getUsersHandler),
+	).Methods(
+		http.MethodGet,
+		http.MethodOptions,
+	)
+
+	http.Handle("/", r)
 }
