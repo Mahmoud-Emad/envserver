@@ -12,7 +12,7 @@ func TestEncryptDecryptValidData(t *testing.T) {
 	value := "!#@!MDF@#FMxcsa3we*"
 
 	t.Run("encrypt/Decrypt a valid data", func(t *testing.T) {
-		encodedVal, err := AESEncrypt([]byte(value), key)
+		encodedVal, err := EncryptAES([]byte(value), key)
 		assert.NoError(t, err)
 
 		decodedVal, err := AESDecryptIt([]byte(encodedVal), key)
@@ -21,7 +21,7 @@ func TestEncryptDecryptValidData(t *testing.T) {
 	})
 
 	t.Run("encrypt/Decrypt an invalid data", func(t *testing.T) {
-		encodedVal, err := AESEncrypt([]byte(value), key)
+		encodedVal, err := EncryptAES([]byte(value), key)
 		assert.NoError(t, err)
 
 		decodedVal, err := AESDecryptIt([]byte(encodedVal), key)
@@ -31,7 +31,7 @@ func TestEncryptDecryptValidData(t *testing.T) {
 	})
 
 	t.Run("encrypt/Decrypt an invalid data wrong key", func(t *testing.T) {
-		encodedVal, err := AESEncrypt([]byte(value), key)
+		encodedVal, err := EncryptAES([]byte(value), key)
 		assert.NoError(t, err)
 
 		_, err = AESDecryptIt([]byte(encodedVal), key+"md5")
