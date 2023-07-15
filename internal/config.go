@@ -48,5 +48,9 @@ func ReadConfigFromReader(r io.Reader) (Configuration, error) {
 	if err != nil {
 		return Configuration{}, fmt.Errorf("failed to decode config from reader: %w", err)
 	}
+	err = config.validateConfiguration()
+	if err != nil {
+		return Configuration{}, err
+	}
 	return config, nil
 }

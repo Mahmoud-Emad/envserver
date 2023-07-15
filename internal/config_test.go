@@ -34,6 +34,38 @@ func TestReadConfigFromString(t *testing.T) {
 
 		assert.Equal(t, expected, config)
 	})
+
+	t.Run("Validate missing database host key", func(t *testing.T) {
+		// Database host key.
+		fileContent := `
+[database]
+user = "postgres"
+password = "postgres"
+port = 5432
+name = "postgres"
+[server]
+port = 8080
+host = "localhost"
+		`
+		_, err := ReadConfigFromString(fileContent)
+		assert.ErrorIs(t, err, databaseHostKeyError)
+	})
+
+	t.Run("Validate missing database user key", func(t *testing.T) {
+		// Database user key.
+		fileContent := `
+[database]
+host = "localhost"
+password = "postgres"
+port = 5432
+name = "postgres"
+[server]
+port = 8080
+host = "localhost"
+		`
+		_, err := ReadConfigFromString(fileContent)
+		assert.ErrorIs(t, err, databaseUserKeyError)
+	})
 }
 
 // Test read config from reader.

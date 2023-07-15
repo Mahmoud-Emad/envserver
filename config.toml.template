@@ -6,4 +6,5 @@ password = "<database_password>"
 name = "<database_name>"
 
 [server]
+host = <local_server_host>
 port = <server_port>
