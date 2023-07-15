@@ -38,8 +38,14 @@ func validateUserFields(user *CreateUserInputs) error {
 	return nil
 }
 
-func (a *App) createUserHandler(w http.ResponseWriter, r *http.Request) {
+// Get all users from the database handler.
+func (a *App) getUsersHandler(w http.ResponseWriter, r *http.Request) {
+	users, _ := a.DB.GetUsers()
+	sendJSONResponse(w, http.StatusOK, "Users found", users, nil)
+	return
+}
 
+func (a *App) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse request data
 	var fields CreateUserInputs
 	err := json.NewDecoder(r.Body).Decode(&fields)
