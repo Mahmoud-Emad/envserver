@@ -167,7 +167,7 @@ func TestEnvironmentKey(t *testing.T) {
 		p, err := db.GetProjectByName(projectName)
 
 		// Encrypted value
-		encryptedVal, err := internal.AESEncrypt([]byte(projectValue), projectKey)
+		encryptedVal, err := internal.EncryptAES([]byte(projectValue), projectKey)
 		assert.NoError(t, err)
 
 		err = db.CreateEnvKey(&EnvironmentKey{
@@ -191,7 +191,7 @@ func TestEnvironmentKey(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Encrypted value
-		encryptedVal, err := internal.AESEncrypt([]byte(projectValue), projectKey)
+		encryptedVal, err := internal.EncryptAES([]byte(projectValue), projectKey)
 		assert.NoError(t, err)
 
 		decodedVal, err := internal.AESDecryptIt(encryptedVal, projectKey)

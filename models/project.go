@@ -8,7 +8,7 @@ import (
 // Project model, containes all project fields.
 type Project struct {
 	gorm.Model
-	ID              uuid.UUID         `gorm:"primary_key; unique; type:uuid; column:id"`
+	ID              uint              `gorm:"primaryKey"`
 	Name            string            `json:"name" binding:"required"`
 	EnvironmentName string            `json:"environment_name"`
 	Team            []*User           `gorm:"many2many:project_team;default:nil"`
@@ -19,31 +19,8 @@ type Project struct {
 // Env keys model, containes all project keys.
 type EnvironmentKey struct {
 	gorm.Model
-	ID        uuid.UUID `gorm:"primary_key; unique; type:uuid; column:id"`
-	ProjectID uuid.UUID
-	Key       string `gorm:"unique;"`
+	ID        uint `gorm:"primaryKey"`
+	ProjectID uint
+	Key       string
 	Value     []byte
-}
-
-// BeforeCreate generates a new uuid.
-func (p *Project) BeforeCreate(tx *gorm.DB) (err error) {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
-
-	p.ID = id
-	return
-}
-
-// BeforeCreate generates a new uuid.
-func (env *EnvironmentKey) BeforeCreate(*gorm.DB) (err error) {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		fmt.Println("error, ", err)
-		return err
-	}
-
-	env.ID = id
-	return
 }
