@@ -13,8 +13,9 @@ type Configuration struct {
 }
 
 type ServerConfiguration struct {
-	Host string `toml:"host"`
-	Port int64  `toml:"port"`
+	Host         string `toml:"host"`
+	Port         int64  `toml:"port"`
+	JWTSecretKey string `toml:"jwtSecretKey"`
 }
 
 type DatabaseConfiguration struct {

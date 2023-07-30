@@ -93,26 +93,25 @@ func (a *App) Start() {
 	}
 }
 
-// registerHandlers registers all handlers with their respective paths in the HTTP router of this application's
 func (a *App) registerHandlers() {
 	r := mux.NewRouter()
+
+	// API version 1 routes
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
+	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 
-	userRouter.HandleFunc(
-		"",
-		wrapRequest(a.createUserHandler),
-	).Methods(
-		http.MethodPost,
-		http.MethodOptions,
-	)
-	userRouter.HandleFunc(
-		"",
-		wrapRequest(a.getUsersHandler),
-	).Methods(
-		http.MethodGet,
-		http.MethodOptions,
-	)
+	// User routes (protected with authentication)
+	userRouter.HandleFunc("", wrapRequest(a.getUsersHandler)).Methods(http.MethodGet, http.MethodOptions)
+	userRouter.HandleFunc("/{id}", wrapRequest(a.deleteUserByIDHandler)).Methods(http.MethodDelete, http.MethodOptions)
 
+	// Auth routes
+	authRouter.HandleFunc("/signup", wrapRequest(a.signupHandler)).Methods(http.MethodPost, http.MethodOptions)
+	authRouter.HandleFunc("/signin", wrapRequest(a.signinHandler)).Methods(http.MethodPost, http.MethodOptions)
+
+	// Add the authentication middleware to the protected routes
+	userRouter.Use(a.authenticateMiddleware)
+
+	// Set the router for the application
 	http.Handle("/", r)
 }

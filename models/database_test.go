@@ -194,10 +194,10 @@ func TestEnvironmentKey(t *testing.T) {
 		encryptedVal, err := internal.EncryptAES([]byte(projectValue), projectKey)
 		assert.NoError(t, err)
 
-		decodedVal, err := internal.AESDecryptIt(encryptedVal, projectKey)
+		decodedVal, err := internal.DecryptAES(encryptedVal, projectKey)
 		assert.NoError(t, err)
 
-		decodedStoredVal, err := internal.AESDecryptIt(env.Value, projectKey)
+		decodedStoredVal, err := internal.DecryptAES(env.Value, projectKey)
 		assert.NoError(t, err)
 
 		assert.Equal(t, decodedVal, decodedStoredVal)

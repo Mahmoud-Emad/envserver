@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
 )
 
@@ -50,4 +52,31 @@ func wrapRequest(h http.HandlerFunc) http.HandlerFunc {
 		log.Debug().Msgf("Request: %s %s", r.Method, r.URL.Path)
 		h(w, r)
 	}
+}
+
+func (a *App) authenticateMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Extract the JWT token from the Authorization header
+		tokenString := r.Header.Get("Authorization")
+		if strings.TrimSpace(tokenString) == "" {
+			log.Warn().Msgf("Request|unauthorized: %s %s", r.Method, r.URL.Path)
+			sendJSONResponse(w, http.StatusUnauthorized, "Authorization token required", nil, nil)
+			return
+		}
+
+		// Parse the JWT token and validate its signature
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			// Replace "your-secret-key" with the same secret key used for signing the token
+			return []byte(a.Config.Server.JWTSecretKey), nil
+		})
+
+		if err != nil || !token.Valid {
+			log.Warn().Msgf("Request|unauthorized: %s %s", r.Method, r.URL.Path)
+			sendJSONResponse(w, http.StatusUnauthorized, "Invalid or expired token", nil, err)
+			return
+		}
+
+		// Token is valid, continue with the next handler
+		next.ServeHTTP(w, r)
+	})
 }

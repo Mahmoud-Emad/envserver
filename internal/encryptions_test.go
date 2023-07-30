@@ -15,7 +15,7 @@ func TestEncryptDecryptValidData(t *testing.T) {
 		encodedVal, err := EncryptAES([]byte(value), key)
 		assert.NoError(t, err)
 
-		decodedVal, err := AESDecryptIt([]byte(encodedVal), key)
+		decodedVal, err := DecryptAES([]byte(encodedVal), key)
 		assert.NoError(t, err)
 		assert.EqualValues(t, value, string(decodedVal))
 	})
@@ -24,7 +24,7 @@ func TestEncryptDecryptValidData(t *testing.T) {
 		encodedVal, err := EncryptAES([]byte(value), key)
 		assert.NoError(t, err)
 
-		decodedVal, err := AESDecryptIt([]byte(encodedVal), key)
+		decodedVal, err := DecryptAES([]byte(encodedVal), key)
 
 		assert.NoError(t, err)
 		assert.NotEqualValues(t, value+"md5", decodedVal)
@@ -34,7 +34,7 @@ func TestEncryptDecryptValidData(t *testing.T) {
 		encodedVal, err := EncryptAES([]byte(value), key)
 		assert.NoError(t, err)
 
-		_, err = AESDecryptIt([]byte(encodedVal), key+"md5")
+		_, err = DecryptAES([]byte(encodedVal), key+"md5")
 		assert.Error(t, err)
 	})
 }

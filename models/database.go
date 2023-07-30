@@ -69,6 +69,13 @@ func (d *Database) GetUserByEmail(email string) (User, error) {
 	return u, query.Error
 }
 
+// GetUserByID returns user by its email
+func (d *Database) GetUserByID(id uint64) (User, error) {
+	var u User
+	query := d.db.First(&u, "id = ?", id)
+	return u, query.Error
+}
+
 // GetUsers returns a list of all user records
 func (d *Database) GetUsers() ([]User, error) {
 	// Retrieve all users
@@ -80,6 +87,12 @@ func (d *Database) GetUsers() ([]User, error) {
 // DeleteUserByEmail deletes a user by their email
 func (d *Database) DeleteUserByEmail(email string) error {
 	result := d.db.Unscoped().Where("email = ?", email).Delete(&User{})
+	return result.Error
+}
+
+// DeleteUserByID deletes a user by their id
+func (d *Database) DeleteUserByID(id uint64) error {
+	result := d.db.Unscoped().Where("id = ?", id).Delete(&User{})
 	return result.Error
 }
 

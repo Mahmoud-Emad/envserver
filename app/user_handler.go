@@ -1,116 +1,56 @@
 package app
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
-	"reflect"
+	"strconv"
 
-	internal "github.com/Mahmoud-Emad/envserver/internal"
-	models "github.com/Mahmoud-Emad/envserver/models"
+	"github.com/gorilla/mux"
 )
 
-// CreateUserInputs struct for data needed when user create an account
-type CreateUserInputs struct {
-	Name         string `json:"name" binding:"required" validate:"min=3,max=20"`
-	Email        string `json:"email" binding:"required" validate:"mail"`
-	Password     string `json:"password" binding:"required" validate:"password"`
-	ProjectOwner bool   `json:"is_owner"`
-}
-
-// ValidateUser checks for the presence of required fields in the user struct.
-func validateUserFields(user *CreateUserInputs) error {
-	t := reflect.TypeOf(*user)
-	v := reflect.ValueOf(*user)
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		if field.Name != "ProjectOwner" {
-			value := v.Field(i).Interface()
-			// Check if the field value is empty or zero
-			if reflect.DeepEqual(value, reflect.Zero(field.Type).Interface()) {
-				return errors.New(fmt.Sprintf("%s field is required", field.Name))
-			}
-		}
+// deleteUserByIDHandler handles the HTTP request for deleting a user by ID.
+// It expects the user ID to be present as a path parameter.
+// If the user is successfully deleted, it returns a JSON response with status 204 (No Content).
+// If the user is not found, it returns a JSON response with status 404 (Not Found).
+// If there is an error during the deletion process, it returns an appropriate error response.
+func (a *App) deleteUserByIDHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the user ID from the path parameters
+	vars := mux.Vars(r)
+	if len(vars) == 0 {
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the user id.", nil, errors.New("User id should be provided"))
 	}
+	userIDStr := vars["id"]
+	// Convert the user ID to uint
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 
-	return nil
-}
-
-// Get all users from the database handler.
-func (a *App) getUsersHandler(w http.ResponseWriter, r *http.Request) {
-	users, _ := a.DB.GetUsers()
-	sendJSONResponse(w, http.StatusOK, "Users found", users, nil)
-	return
-}
-
-func (a *App) createUserHandler(w http.ResponseWriter, r *http.Request) {
-	// Parse request data
-	var fields CreateUserInputs
-	err := json.NewDecoder(r.Body).Decode(&fields)
+	// Check if the user exists
+	_, err = a.DB.GetUserByID(userID)
 
 	if err != nil {
-		sendJSONResponse(w, http.StatusBadRequest, "Invalid request payload", nil, err)
+		sendJSONResponse(w, http.StatusNotFound, "User not found", nil, err)
 		return
 	}
 
-	// Validate user data
-	err = validateUserFields(&fields)
+	// Delete the user from the database
+	err = a.DB.DeleteUserByID(userID)
 	if err != nil {
-		sendJSONResponse(
-			w, http.StatusBadRequest,
-			"Please ensure that all mandatory fields have been filled out.",
-			nil,
-			err,
-		)
-		return
-	}
-
-	// We save the user password in the hash, the value should be the actual value and the key should be the hashed password value.
-	mdPassHash := internal.HashMD5(fields.Password)
-	hashedPassword, err := internal.EncryptAES([]byte(fields.Password), mdPassHash)
-
-	if err != nil {
-		sendJSONResponse(
-			w, http.StatusBadRequest,
-			"Failed to create user object.",
-			nil,
-			internal.InternalServerError,
-		)
-		return
-	}
-
-	found, err := a.DB.GetUserByEmail(fields.Email)
-	if found.Email == fields.Email {
-		sendJSONResponse(
-			w, http.StatusBadRequest,
-			"Failed to create user object.",
-			nil,
-			internal.UserEmailNotUniqueError,
-		)
-		return
-	}
-
-	user := models.User{
-		Name:           fields.Name,
-		Email:          fields.Email,
-		HashedPassword: hashedPassword,
-		Projects:       []*models.Project{},
-		IsOwner:        fields.ProjectOwner,
-	}
-
-	err = a.DB.CreateUser(&user)
-	if err != nil {
-		sendJSONResponse(
-			w, http.StatusBadRequest,
-			"Failed to create user object.",
-			nil,
-			err,
-		)
+		sendJSONResponse(w, http.StatusInternalServerError, "Failed to delete user", nil, err)
 		return
 	}
 
 	// Return success response
-	sendJSONResponse(w, http.StatusCreated, "User registered successfully", user, nil)
+	sendJSONResponse(w, http.StatusNoContent, "User deleted successfully", nil, nil)
+}
+
+// getUsersHandler handles the HTTP request for retrieving all users from the database.
+// It returns a JSON response with status 200 (OK) containing an array of users.
+// If the retrieval encounters an error, it returns an appropriate error response.
+func (a *App) getUsersHandler(w http.ResponseWriter, r *http.Request) {
+	users, err := a.DB.GetUsers()
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, "Failed to retrieve users", nil, err)
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, "Users found", users, nil)
 }

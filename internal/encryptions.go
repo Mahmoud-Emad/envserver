@@ -34,7 +34,7 @@ func EncryptAES(value []byte, keyPhrase string) ([]byte, error) {
 	return cipheredText, nil
 }
 
-func AESDecryptIt(ciphered []byte, keyPhrase string) ([]byte, error) {
+func DecryptAES(ciphered []byte, keyPhrase string) ([]byte, error) {
 	hashedPhrase := HashMD5(keyPhrase)
 	aesBlock, err := aes.NewCipher([]byte(hashedPhrase))
 	if err != nil {
