@@ -8,3 +8,4 @@ name = "<database_name>"
 [server]
 host = <local_server_host>
 port = <server_port>
+jwtSecretKey = <jwtSecretKey?> # simple text used as secret key for the jwt token

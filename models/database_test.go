@@ -7,24 +7,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	confContent = `
+var configContent = `
+[server]
+host = "localhost"
+port = 8080
+
 [database]
 host = "localhost"
-user = "postgres"
-password = "postgres"
 port = 5432
 name = "postgres"
-[server]
-port = 8080
-host = "localhost"
+user = "postgres"
+password = "postgres"
 `
-)
 
 // Setup database helper, created to be used inside test case functions.
 func setupDB(t *testing.T) (Database, internal.Configuration) {
 	db := NewDatabase()
-	config, err := internal.ReadConfigFromString(confContent)
+	config, err := internal.ReadConfigFromString(configContent)
 
 	err = db.Connect(config.Database)
 	assert.NoError(t, err)
@@ -45,6 +44,7 @@ func createTestConfig() internal.Configuration {
 			Password: "postgres",
 			Name:     "postgres",
 		},
+
 		Server: internal.ServerConfiguration{
 			Host: "localhost",
 			Port: 8080,
@@ -64,6 +64,7 @@ func TestDatabaseConnect(t *testing.T) {
 		err := db.Connect(internal.DatabaseConfiguration{})
 		assert.Error(t, err)
 	})
+
 	t.Run("valid database", func(t *testing.T) {
 		err := db.Connect(conf.Database)
 		assert.NoError(t, err)
@@ -85,7 +86,6 @@ func TestUser(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-
 		user, err := db.GetUserByEmail(email)
 
 		assert.Equal(t, user.Name, username)
@@ -96,14 +96,12 @@ func TestUser(t *testing.T) {
 		// Test delete user record from the database by it's email.
 		db, _ := setupDB(t)
 		var user User
-
 		user, err := db.GetUserByEmail(email)
 
 		assert.NoError(t, err)
 		assert.Equal(t, user.Name, username)
 
 		err = db.DeleteUserByEmail(email)
-
 		assert.NoError(t, err)
 
 		user, err = db.GetUserByEmail(email)
@@ -139,7 +137,6 @@ func TestProject(t *testing.T) {
 		assert.Equal(t, p.Name, projectName)
 
 		err = db.DeleteProjectByName(projectName)
-
 		assert.NoError(t, err)
 
 		_, err = db.GetProjectByName(projectName)
@@ -163,7 +160,6 @@ func TestEnvironmentKey(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-
 		p, err := db.GetProjectByName(projectName)
 
 		// Encrypted value
@@ -175,7 +171,6 @@ func TestEnvironmentKey(t *testing.T) {
 			Value:     encryptedVal,
 			ProjectID: p.ID,
 		})
-
 		assert.NoError(t, err)
 
 		env, err := db.GetEnvKeyByKeyName(projectKey)
@@ -204,14 +199,12 @@ func TestEnvironmentKey(t *testing.T) {
 		assert.Equal(t, string(decodedVal), string(decodedStoredVal))
 
 		err = db.DeleteEnvKeyByKeyName(projectKey)
-
 		assert.NoError(t, err)
 
 		_, err = db.GetEnvKeyByKeyName(projectKey)
 		assert.Error(t, err)
 
 		err = db.DeleteProjectByName(projectName)
-
 		assert.NoError(t, err)
 
 		_, err = db.GetProjectByName(projectName)

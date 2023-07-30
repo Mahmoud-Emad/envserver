@@ -9,3 +9,6 @@ test: build
 
 clean:
 	rm -rf ./envserver
+
+install:
+	go mod download
