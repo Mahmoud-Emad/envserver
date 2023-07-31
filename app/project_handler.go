@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// getProjectsHandler retrieves a list of projects from the database and sends the response as JSON.
 func (a *App) getProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	projects, err := a.DB.GetProjects()
 	if err != nil {
@@ -21,14 +22,15 @@ func (a *App) getProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	sendJSONResponse(w, http.StatusOK, "Projects found successfully", projects, nil)
 }
 
+// deleteProjectByIDHandler deletes a project by its ID. The ID is retrieved from the URL path parameters.
 func (a *App) deleteProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	if len(vars) == 0 {
 		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the project id.", nil, errors.New("Project id should be provided."))
+		return
 	}
 
 	projectIDStr := vars["id"]
-	// Convert the user ID to uint
 	u64, err := strconv.ParseUint(projectIDStr, 10, 32)
 	uID := uint(u64)
 
@@ -42,14 +44,15 @@ func (a *App) deleteProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	sendJSONResponse(w, http.StatusNoContent, "Project deleted successfully", nil, nil)
 }
 
+// getProjectByIDHandler retrieves a project by its ID. The ID is retrieved from the URL path parameters.
 func (a *App) getProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	if len(vars) == 0 {
 		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the project id.", nil, errors.New("Project id should be provided."))
+		return
 	}
 
 	projectIDStr := vars["id"]
-	// Convert the user ID to uint
 	u64, err := strconv.ParseUint(projectIDStr, 10, 32)
 	uID := uint(u64)
 
@@ -61,8 +64,10 @@ func (a *App) getProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	sendJSONResponse(w, http.StatusOK, "Project found successfully", project, nil)
 }
 
+// createProjectHandler creates a new project based on the provided request payload.
 func (a *App) createProjectHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := internal.GetRequestedUser(r)
+	fmt.Println("Request Header: ", r.Header)
+	user, err := a.GetRequestedUser(r)
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Requested user not found.", nil, err)
 		return

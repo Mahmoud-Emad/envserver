@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Mahmoud-Emad/envserver/internal"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
 )
@@ -68,7 +67,7 @@ func (a *App) wrapRequest(h http.HandlerFunc, protected bool) http.HandlerFunc {
 			}
 
 			// Add the user object inside the request.
-			ctx := context.WithValue(r.Context(), internal.UserContextKey, user)
+			ctx := context.WithValue(r.Context(), UserContextKey, user)
 			r = r.WithContext(ctx)
 
 			// Print out the incoming request URL and its method for debugging.

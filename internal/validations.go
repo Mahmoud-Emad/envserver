@@ -3,26 +3,8 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"reflect"
-
-	models "github.com/Mahmoud-Emad/envserver/models"
 )
-
-// Define a custom type for the context key to avoid potential collisions with other keys.
-type contextKey int
-
-// Create a new context key to store the user information.
-const UserContextKey contextKey = 1
-
-// Get the requested user data.
-func GetRequestedUser(r *http.Request) (models.User, error) {
-	user, ok := r.Context().Value(UserContextKey).(models.User)
-	if !ok {
-		return user, errors.New("Cannot find the user object in the request.")
-	}
-	return user, nil
-}
 
 // ValidateUser checks for the presence of required fields in the user struct.
 func ValidateUserFields(user *SignUpInputs) error {

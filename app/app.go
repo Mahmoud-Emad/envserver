@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	internal "github.com/Mahmoud-Emad/envserver/internal"
+	models "github.com/Mahmoud-Emad/envserver/models"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -90,6 +92,29 @@ func (a *App) Start() {
 	} else {
 		log.Info().Msgf("Server gracefully stopped")
 	}
+}
+
+// Define a custom type for the context key to avoid potential collisions with other keys.
+type contextKey int
+
+// Create a new context key to store the user information.
+const UserContextKey contextKey = 1
+
+// Get the requested user data.
+func (a *App) GetRequestedUser(r *http.Request) (models.User, error) {
+	user, ok := r.Context().Value(UserContextKey).(models.User)
+	if !ok {
+		authHeader := r.Header.Get("Authorization")
+		user, err := VerifyAndDecodeJwtToken(authHeader, a.Config.Server.JWTSecretKey)
+		if err != nil {
+			return user, errors.New("Cannot decode jwt.")
+		}
+
+		// Add the user object inside the request.
+		ctx := context.WithValue(r.Context(), UserContextKey, user)
+		r = r.WithContext(ctx)
+	}
+	return user, nil
 }
 
 func (a *App) registerHandlers() {
