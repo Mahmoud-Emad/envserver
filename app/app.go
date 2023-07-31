@@ -99,17 +99,25 @@ func (a *App) registerHandlers() {
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
+	projectRouter := apiRouter.PathPrefix("/projects").Subrouter()
 
 	// User routes (protected with authentication)
-	userRouter.HandleFunc("", wrapRequest(a.getUsersHandler)).Methods(http.MethodGet, http.MethodOptions)
-	userRouter.HandleFunc("/{id}", wrapRequest(a.deleteUserByIDHandler)).Methods(http.MethodDelete, http.MethodOptions)
+	userRouter.HandleFunc("", a.wrapRequest(a.getUsersHandler, true)).Methods(http.MethodGet, http.MethodOptions)
+	userRouter.HandleFunc("/{id}", a.wrapRequest(a.deleteUserByIDHandler, true)).Methods(http.MethodDelete, http.MethodOptions)
 
 	// Auth routes
-	authRouter.HandleFunc("/signup", wrapRequest(a.signupHandler)).Methods(http.MethodPost, http.MethodOptions)
-	authRouter.HandleFunc("/signin", wrapRequest(a.signinHandler)).Methods(http.MethodPost, http.MethodOptions)
+	authRouter.HandleFunc("/signup", a.wrapRequest(a.signupHandler, false)).Methods(http.MethodPost, http.MethodOptions)
+	authRouter.HandleFunc("/signin", a.wrapRequest(a.signinHandler, false)).Methods(http.MethodPost, http.MethodOptions)
+
+	// Project routes (protected with authentication)
+	projectRouter.HandleFunc("", a.wrapRequest(a.createProjectHandler, true)).Methods(http.MethodPost, http.MethodOptions)
+	projectRouter.HandleFunc("", a.wrapRequest(a.getProjectsHandler, true)).Methods(http.MethodGet, http.MethodOptions)
+	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.getProjectByIDHandler, true)).Methods(http.MethodGet, http.MethodOptions)
+	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.deleteProjectByIDHandler, true)).Methods(http.MethodDelete, http.MethodOptions)
 
 	// Add the authentication middleware to the protected routes
 	userRouter.Use(a.authenticateMiddleware)
+	projectRouter.Use(a.authenticateMiddleware)
 
 	// Set the router for the application
 	http.Handle("/", r)

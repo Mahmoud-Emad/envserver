@@ -5,7 +5,7 @@ run: build
 	./envserver
 
 test: build
-	go test ./...
+	go clean -testcache && go test ./...
 
 clean:
 	rm -rf ./envserver

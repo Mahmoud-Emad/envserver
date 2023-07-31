@@ -69,10 +69,17 @@ func (d *Database) GetUserByEmail(email string) (models.User, error) {
 }
 
 // GetUserByID returns user by its email
-func (d *Database) GetUserByID(id uint64) (models.User, error) {
+func (d *Database) GetUserByID(id uint) (models.User, error) {
 	var u models.User
 	query := d.db.First(&u, "id = ?", id)
 	return u, query.Error
+}
+
+// GetProjectByID returns user by its email
+func (d *Database) GetProjectByID(id uint) (models.Project, error) {
+	var p models.Project
+	query := d.db.First(&p, "id = ?", id)
+	return p, query.Error
 }
 
 // GetUsers returns a list of all user records
@@ -83,6 +90,14 @@ func (d *Database) GetUsers() ([]models.User, error) {
 	return users, result.Error
 }
 
+// GetUsers returns a list of all project records
+func (d *Database) GetProjects() ([]models.Project, error) {
+	// Retrieve all users
+	var projects []models.Project
+	result := d.db.Find(&projects)
+	return projects, result.Error
+}
+
 // DeleteUserByEmail deletes a user by their email
 func (d *Database) DeleteUserByEmail(email string) error {
 	result := d.db.Unscoped().Where("email = ?", email).Delete(&models.User{})
@@ -90,7 +105,7 @@ func (d *Database) DeleteUserByEmail(email string) error {
 }
 
 // DeleteUserByID deletes a user by their id
-func (d *Database) DeleteUserByID(id uint64) error {
+func (d *Database) DeleteUserByID(id uint) error {
 	result := d.db.Unscoped().Where("id = ?", id).Delete(&models.User{})
 	return result.Error
 }
@@ -104,6 +119,12 @@ func (d *Database) CreateProject(p *models.Project) error {
 // DeleteProjectByName deletes a project by it's name
 func (d *Database) DeleteProjectByName(name string) error {
 	result := d.db.Unscoped().Where("name = ?", name).Delete(&models.Project{})
+	return result.Error
+}
+
+// DeleteProjectByName deletes a project by it's name
+func (d *Database) DeleteProjectByID(id uint) error {
+	result := d.db.Unscoped().Where("id = ?", id).Delete(&models.Project{})
 	return result.Error
 }
 

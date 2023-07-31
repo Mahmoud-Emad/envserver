@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -10,9 +9,9 @@ type Project struct {
 	gorm.Model
 	ID              uint              `gorm:"primaryKey"`
 	Name            string            `json:"name" binding:"required"`
-	EnvironmentName string            `json:"environment_name"`
+	EnvironmentName string            `json:"environment_name"` // e.g. test, dev, production.
 	Team            []*User           `gorm:"many2many:project_team;default:nil"`
-	Owner           uuid.UUID         // Foreign key referencing User's ID field
+	Owner           uint              // Foreign key referencing User's ID field
 	Keys            []*EnvironmentKey `gorm:"default:nil"`
 }
 

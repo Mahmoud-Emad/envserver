@@ -13,3 +13,8 @@ type SigninInputs struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+// ProjectInputs represents the input data for the create project process.
+type ProjectInputs struct {
+	Name string `json:"name"`
+}

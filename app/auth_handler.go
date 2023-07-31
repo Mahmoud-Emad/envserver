@@ -10,22 +10,22 @@ import (
 
 func (a *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse request data
-	var inputs internal.SigninInputs
-	err := json.NewDecoder(r.Body).Decode(&inputs)
+	var fields internal.SigninInputs
+	err := json.NewDecoder(r.Body).Decode(&fields)
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Invalid request payload", nil, err)
 		return
 	}
 
 	// Find the user by email
-	user, err := a.DB.GetUserByEmail(inputs.Email)
+	user, err := a.DB.GetUserByEmail(fields.Email)
 	if err != nil {
 		sendJSONResponse(w, http.StatusUnauthorized, "Cannot get user object with this email.", nil, err)
 		return
 	}
 
 	// Check if the provided password is correct
-	if !internal.CheckPasswordHash(inputs.Password, user.HashedPassword) {
+	if !internal.CheckPasswordHash(fields.Password, user.HashedPassword) {
 		sendJSONResponse(w, http.StatusUnauthorized, "Invalid email or password", nil, nil)
 		return
 	}

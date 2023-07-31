@@ -40,8 +40,15 @@ func VerifyAndDecodeJwtToken(tokenString, JWTSecretKey string) (models.User, err
 		return models.User{}, errors.New("invalid token claims")
 	}
 
+	// Convert ID field from float64 to uint
+	idFloat, ok := payload["id"].(float64)
+	if !ok {
+		return models.User{}, errors.New("invalid id field in token")
+	}
+	id := uint(idFloat)
+
 	user := models.User{
-		ID:    payload["id"].(uint),
+		ID:    id,
 		Email: payload["email"].(string),
 	}
 	return user, nil

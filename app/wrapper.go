@@ -1,11 +1,13 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/Mahmoud-Emad/envserver/internal"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
 )
@@ -46,10 +48,36 @@ func sendJSONResponse(w http.ResponseWriter, status int, message string, data in
 	json.NewEncoder(w).Encode(response)
 }
 
-// Used for debugging, print out the incoming request URL and its method.
-func wrapRequest(h http.HandlerFunc) http.HandlerFunc {
+// wrapRequest wraps an HTTP handler function with additional debugging information and optional authentication check.
+// If protected is true, the incoming request is expected to include a JWT token in the "Authorization" header.
+func (a *App) wrapRequest(h http.HandlerFunc, protected bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Debug().Msgf("Request: %s %s", r.Method, r.URL.Path)
+		if protected {
+			// Check if the request includes a JWT token in the "Authorization" header.
+			authHeader := r.Header.Get("Authorization")
+			if authHeader == "" {
+				http.Error(w, "Unauthorized: JWT token missing", http.StatusUnauthorized)
+				return
+			}
+
+			// Validate and decode the JWT token.
+			user, err := VerifyAndDecodeJwtToken(authHeader, a.Config.Server.JWTSecretKey)
+			if err != nil {
+				http.Error(w, "Unauthorized: Invalid JWT token", http.StatusUnauthorized)
+				return
+			}
+
+			// Add the user object inside the request.
+			ctx := context.WithValue(r.Context(), internal.UserContextKey, user)
+			r = r.WithContext(ctx)
+
+			// Print out the incoming request URL and its method for debugging.
+			log.Debug().Msgf("User: %d | Request: %s %s", user.ID, r.Method, r.URL.Path)
+		} else {
+			// Print out the incoming request URL and its method for debugging.
+			log.Debug().Msgf("Request: %s %s", r.Method, r.URL.Path)
+		}
+		// Call the original handler.
 		h(w, r)
 	}
 }
