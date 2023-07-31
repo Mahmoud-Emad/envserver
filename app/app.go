@@ -9,7 +9,6 @@ import (
 	"time"
 
 	internal "github.com/Mahmoud-Emad/envserver/internal"
-	models "github.com/Mahmoud-Emad/envserver/models"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -19,7 +18,7 @@ import (
 type App struct {
 	Config internal.Configuration
 	Server Server
-	DB     models.Database
+	DB     internal.Database
 }
 
 func initZerolog() {
@@ -38,7 +37,7 @@ func NewApp(configFileName string) (app *App, err error) {
 	}
 
 	server := NewServer(config.Server.Host, config.Server.Port)
-	db := models.NewDatabase()
+	db := internal.NewDatabase()
 	err = db.Connect(config.Database)
 
 	if err != nil {

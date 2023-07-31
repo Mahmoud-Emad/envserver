@@ -1,9 +1,9 @@
-package models
+package internal
 
 import (
 	"testing"
 
-	internal "github.com/Mahmoud-Emad/envserver/internal"
+	models "github.com/Mahmoud-Emad/envserver/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,9 +21,9 @@ password = "postgres"
 `
 
 // Setup database helper, created to be used inside test case functions.
-func setupDB(t *testing.T) (Database, internal.Configuration) {
+func setupDB(t *testing.T) (Database, Configuration) {
 	db := NewDatabase()
-	config, err := internal.ReadConfigFromString(configContent)
+	config, err := ReadConfigFromString(configContent)
 
 	err = db.Connect(config.Database)
 	assert.NoError(t, err)
@@ -35,9 +35,9 @@ func setupDB(t *testing.T) (Database, internal.Configuration) {
 }
 
 // Create a test configuration for database connection.
-func createTestConfig() internal.Configuration {
-	return internal.Configuration{
-		Database: internal.DatabaseConfiguration{
+func createTestConfig() Configuration {
+	return Configuration{
+		Database: DatabaseConfiguration{
 			Host:     "localhost",
 			Port:     5432,
 			User:     "postgres",
@@ -45,7 +45,7 @@ func createTestConfig() internal.Configuration {
 			Name:     "postgres",
 		},
 
-		Server: internal.ServerConfiguration{
+		Server: ServerConfiguration{
 			Host: "localhost",
 			Port: 8080,
 		},
@@ -61,7 +61,7 @@ func TestDatabaseConnect(t *testing.T) {
 	db, conf := setupDB(t)
 
 	t.Run("invalid database", func(t *testing.T) {
-		err := db.Connect(internal.DatabaseConfiguration{})
+		err := db.Connect(DatabaseConfiguration{})
 		assert.Error(t, err)
 	})
 
@@ -79,10 +79,10 @@ func TestUser(t *testing.T) {
 		// Test create new user record into the database.
 
 		db, _ := setupDB(t)
-		err := db.CreateUser(&User{
+		err := db.CreateUser(&models.User{
 			Name:     username,
 			Email:    email,
-			Projects: []*Project{},
+			Projects: []*models.Project{},
 		})
 
 		assert.NoError(t, err)
@@ -95,7 +95,7 @@ func TestUser(t *testing.T) {
 	t.Run("delete created user", func(t *testing.T) {
 		// Test delete user record from the database by it's email.
 		db, _ := setupDB(t)
-		var user User
+		var user models.User
 		user, err := db.GetUserByEmail(email)
 
 		assert.NoError(t, err)
@@ -115,7 +115,7 @@ func TestProject(t *testing.T) {
 	t.Run("create new project object", func(t *testing.T) {
 		// Test create new project record into the database.
 		db, _ := setupDB(t)
-		err := db.CreateProject(&Project{
+		err := db.CreateProject(&models.Project{
 			Name: projectName,
 		})
 
@@ -155,7 +155,7 @@ func TestEnvironmentKey(t *testing.T) {
 		// Test create new env key|value record into the database.
 		db, _ := setupDB(t)
 
-		err := db.CreateProject(&Project{
+		err := db.CreateProject(&models.Project{
 			Name: projectName,
 		})
 
@@ -163,10 +163,10 @@ func TestEnvironmentKey(t *testing.T) {
 		p, err := db.GetProjectByName(projectName)
 
 		// Encrypted value
-		encryptedVal, err := internal.EncryptAES([]byte(projectValue), projectKey)
+		encryptedVal, err := EncryptAES([]byte(projectValue), projectKey)
 		assert.NoError(t, err)
 
-		err = db.CreateEnvKey(&EnvironmentKey{
+		err = db.CreateEnvKey(&models.EnvironmentKey{
 			Key:       projectKey,
 			Value:     encryptedVal,
 			ProjectID: p.ID,
@@ -186,13 +186,13 @@ func TestEnvironmentKey(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Encrypted value
-		encryptedVal, err := internal.EncryptAES([]byte(projectValue), projectKey)
+		encryptedVal, err := EncryptAES([]byte(projectValue), projectKey)
 		assert.NoError(t, err)
 
-		decodedVal, err := internal.DecryptAES(encryptedVal, projectKey)
+		decodedVal, err := DecryptAES(encryptedVal, projectKey)
 		assert.NoError(t, err)
 
-		decodedStoredVal, err := internal.DecryptAES(env.Value, projectKey)
+		decodedStoredVal, err := DecryptAES(env.Value, projectKey)
 		assert.NoError(t, err)
 
 		assert.Equal(t, decodedVal, decodedStoredVal)

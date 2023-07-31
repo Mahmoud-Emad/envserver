@@ -1,11 +1,10 @@
-// Package models for database models
-package models
+package internal
 
 import (
 	"fmt"
 	"reflect"
 
-	"github.com/Mahmoud-Emad/envserver/internal"
+	models "github.com/Mahmoud-Emad/envserver/models"
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -22,7 +21,7 @@ func NewDatabase() Database {
 }
 
 // Connect connects to database server.
-func (d *Database) Connect(dbConfig internal.DatabaseConfiguration) error {
+func (d *Database) Connect(dbConfig DatabaseConfiguration) error {
 	log.Info().Msg("Connecting to the database.")
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
@@ -40,7 +39,7 @@ func (d *Database) Connect(dbConfig internal.DatabaseConfiguration) error {
 
 // Migrate migrates the database schema.
 func (d *Database) Migrate() error {
-	tables := []interface{}{&User{}, &Project{}, &EnvironmentKey{}}
+	tables := []interface{}{&models.User{}, &models.Project{}, &models.EnvironmentKey{}}
 
 	log.Info().Msg("Database migration started")
 	for _, table := range tables {
@@ -57,73 +56,73 @@ func (d *Database) Migrate() error {
 }
 
 // Create new user object inside the daabase.
-func (d *Database) CreateUser(u *User) error {
+func (d *Database) CreateUser(u *models.User) error {
 	result := d.db.Create(&u)
 	return result.Error
 }
 
 // GetUserByEmail returns user by its email
-func (d *Database) GetUserByEmail(email string) (User, error) {
-	var u User
+func (d *Database) GetUserByEmail(email string) (models.User, error) {
+	var u models.User
 	query := d.db.First(&u, "email = ?", email)
 	return u, query.Error
 }
 
 // GetUserByID returns user by its email
-func (d *Database) GetUserByID(id uint64) (User, error) {
-	var u User
+func (d *Database) GetUserByID(id uint64) (models.User, error) {
+	var u models.User
 	query := d.db.First(&u, "id = ?", id)
 	return u, query.Error
 }
 
 // GetUsers returns a list of all user records
-func (d *Database) GetUsers() ([]User, error) {
+func (d *Database) GetUsers() ([]models.User, error) {
 	// Retrieve all users
-	var users []User
+	var users []models.User
 	result := d.db.Find(&users)
 	return users, result.Error
 }
 
 // DeleteUserByEmail deletes a user by their email
 func (d *Database) DeleteUserByEmail(email string) error {
-	result := d.db.Unscoped().Where("email = ?", email).Delete(&User{})
+	result := d.db.Unscoped().Where("email = ?", email).Delete(&models.User{})
 	return result.Error
 }
 
 // DeleteUserByID deletes a user by their id
 func (d *Database) DeleteUserByID(id uint64) error {
-	result := d.db.Unscoped().Where("id = ?", id).Delete(&User{})
+	result := d.db.Unscoped().Where("id = ?", id).Delete(&models.User{})
 	return result.Error
 }
 
 // Create new project object inside the daabase.
-func (d *Database) CreateProject(p *Project) error {
+func (d *Database) CreateProject(p *models.Project) error {
 	result := d.db.Create(&p)
 	return result.Error
 }
 
 // DeleteProjectByName deletes a project by it's name
 func (d *Database) DeleteProjectByName(name string) error {
-	result := d.db.Unscoped().Where("name = ?", name).Delete(&Project{})
+	result := d.db.Unscoped().Where("name = ?", name).Delete(&models.Project{})
 	return result.Error
 }
 
 // GetProjectByName returns user by its name
-func (d *Database) GetProjectByName(name string) (Project, error) {
-	var p Project
+func (d *Database) GetProjectByName(name string) (models.Project, error) {
+	var p models.Project
 	query := d.db.First(&p, "name = ?", name)
 	return p, query.Error
 }
 
 // Create new EnvironmentKey object inside the daabase.
-func (d *Database) CreateEnvKey(env *EnvironmentKey) error {
+func (d *Database) CreateEnvKey(env *models.EnvironmentKey) error {
 	result := d.db.Create(&env)
 	return result.Error
 }
 
 // DeleteEnvironmentKeyByKeyName Delete an EnvironmentKey by it's key name.
 func (d *Database) DeleteEnvKeyByKeyName(keyName string) error {
-	result := d.db.Unscoped().Where("key = ?", keyName).Delete(&EnvironmentKey{})
+	result := d.db.Unscoped().Where("key = ?", keyName).Delete(&models.EnvironmentKey{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -131,8 +130,8 @@ func (d *Database) DeleteEnvKeyByKeyName(keyName string) error {
 }
 
 // GetEnvKeyByKeyName returns user by its key name
-func (d *Database) GetEnvKeyByKeyName(keyName string) (EnvironmentKey, error) {
-	var env EnvironmentKey
+func (d *Database) GetEnvKeyByKeyName(keyName string) (models.EnvironmentKey, error) {
+	var env models.EnvironmentKey
 	query := d.db.First(&env, "key = ?", keyName)
 	return env, query.Error
 }
