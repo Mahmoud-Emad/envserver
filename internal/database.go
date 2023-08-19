@@ -22,6 +22,8 @@ func NewDatabase() Database {
 
 // Connect connects to database server.
 func (d *Database) Connect(dbConfig DatabaseConfiguration) error {
+	log.Info().Msg("Loading config file.")
+	fmt.Println(dbConfig)
 	log.Info().Msg("Connecting to the database.")
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)

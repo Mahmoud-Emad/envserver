@@ -1,6 +1,0 @@
-[database]
-host = "localhost"
-port = 5432
-user = "postgres"       # Same as POSTGRES_USER in the workflow
-password = "password"  # Same as POSTGRES_PASSWORD in the workflow
-name = "postgres"      # Same as POSTGRES_DB in the workflow

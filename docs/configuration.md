@@ -28,5 +28,6 @@ Replace the placeholder values `<database_host>`, `<database_port>`, `<database_
 - `<database_name>`         : Replace with the name of your database (e.g., "postgres").
 - `<server_host>`           : Replace with the host address of your server (e.g., "localhost").
 - `<server_port>`           : Replace with the desired port number for your server (e.g., 8080).
+- `<jwtSecretKey?>`         : Replace with simple text used as secret key for the jwt token.
 
 Make sure to save the config.toml file after updating the values.
