@@ -21,7 +21,7 @@ password = "postgres"
 `
 
 // Setup database helper, created to be used inside test case functions.
-func setupDB(t *testing.T) (Database, Configuration) {
+func setupDB(t *testing.T) (Database, Config) {
 	db := NewDatabase()
 	config, err := ReadConfigFromString(configContent)
 
@@ -34,10 +34,10 @@ func setupDB(t *testing.T) (Database, Configuration) {
 	return db, config
 }
 
-// Create a test configuration for database connection.
-func createTestConfig() Configuration {
-	return Configuration{
-		Database: DatabaseConfiguration{
+// Create a test Config for database connection.
+func createTestConfig() Config {
+	return Config{
+		Database: DatabaseConfig{
 			Host:     "localhost",
 			Port:     5432,
 			User:     "postgres",
@@ -45,7 +45,7 @@ func createTestConfig() Configuration {
 			Name:     "postgres",
 		},
 
-		Server: ServerConfiguration{
+		Server: ServerConfig{
 			Host: "localhost",
 			Port: 8080,
 		},
@@ -53,15 +53,15 @@ func createTestConfig() Configuration {
 }
 
 // Test connect to database.
-// This function expect to initialize a database with a specific configuration.
+// This function expect to initialize a database with a specific Config.
 // The expected behavior is
-// 1 - Raising an error in the first block based on the wrong configuration.
-// 2 - Passing the second scenario because it's a valid database configuration.
+// 1 - Raising an error in the first block based on the wrong Config.
+// 2 - Passing the second scenario because it's a valid database Config.
 func TestDatabaseConnect(t *testing.T) {
 	db, conf := setupDB(t)
 
 	t.Run("invalid database", func(t *testing.T) {
-		err := db.Connect(DatabaseConfiguration{})
+		err := db.Connect(DatabaseConfig{})
 		assert.Error(t, err)
 	})
 

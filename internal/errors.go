@@ -23,7 +23,7 @@ var (
 )
 
 // Check all required fields then return an error if there.
-func (c *Configuration) validateConfiguration() error {
+func (c *Config) validateConfig() error {
 	if strings.TrimSpace(c.Server.Host) == "" {
 		return serverHostKeyError
 	}

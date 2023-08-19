@@ -1,8 +1,8 @@
-# Project Configuration
+# Project Config
 
-This guide will help you set up the config.toml configuration file for your project.
+This guide will help you set up the config.toml Config file for your project.
 
-## Configuration File (`config.toml`)
+## Config File (`config.toml`)
 
 Create a new file named `config.toml` in the root directory and populate it with the following contents:
 

@@ -7,19 +7,19 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type Configuration struct {
-	Database DatabaseConfiguration `toml:"database"`
-	Server   ServerConfiguration   `toml:"server"`
+type Config struct {
+	Database DatabaseConfig `toml:"database"`
+	Server   ServerConfig   `toml:"server"`
 }
 
-type ServerConfiguration struct {
+type ServerConfig struct {
 	Host            string `toml:"host"`
 	Port            int    `toml:"port"`
 	JWTSecretKey    string `toml:"jwtSecretKey"`
 	ShutdownTimeout int    `toml:"shutdownTimeout"`
 }
 
-type DatabaseConfiguration struct {
+type DatabaseConfig struct {
 	Host     string `toml:"host"`
 	Port     int64  `toml:"port"`
 	User     string `toml:"user"`
@@ -28,34 +28,34 @@ type DatabaseConfiguration struct {
 }
 
 // Read the config file.
-func ReadConfigFromFile(path string) (Configuration, error) {
-	config := Configuration{}
+func ReadConfigFromFile(path string) (Config, error) {
+	config := Config{}
 	_, err := toml.DecodeFile(path, &config)
 	if err != nil {
-		return Configuration{}, cantLoadConfigFileError
+		return Config{}, cantLoadConfigFileError
 	}
-	err = config.validateConfiguration()
+	err = config.validateConfig()
 	if err != nil {
-		return Configuration{}, err
+		return Config{}, err
 	}
 	return config, nil
 }
 
 // Read the config from a string.
-func ReadConfigFromString(content string) (Configuration, error) {
+func ReadConfigFromString(content string) (Config, error) {
 	return ReadConfigFromReader(strings.NewReader(content))
 }
 
 // Read the config from a reader.
-func ReadConfigFromReader(r io.Reader) (Configuration, error) {
-	config := Configuration{}
-	_, err := toml.DecodeReader(r, &config)
+func ReadConfigFromReader(r io.Reader) (Config, error) {
+	config := Config{}
+	_, err := toml.NewDecoder(r).Decode(&config)
 	if err != nil {
-		return Configuration{}, cantDecodeConfigError
+		return Config{}, cantDecodeConfigError
 	}
-	err = config.validateConfiguration()
+	err = config.validateConfig()
 	if err != nil {
-		return Configuration{}, err
+		return Config{}, err
 	}
 	return config, nil
 }

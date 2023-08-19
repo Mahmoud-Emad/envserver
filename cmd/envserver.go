@@ -10,11 +10,11 @@ import (
 
 func main() {
 	var configFilePath string
-	flag.StringVar(&configFilePath, "config", "", "Path to the configuration file")
+	flag.StringVar(&configFilePath, "config", "", "Path to the Config file")
 	flag.Parse()
 
 	if configFilePath == "" {
-		fmt.Println("Error: You must provide the path to the configuration file using the -config flag.")
+		fmt.Println("Error: You must provide the path to the Config file using the -config flag.")
 		flag.Usage()
 		os.Exit(1)
 	}

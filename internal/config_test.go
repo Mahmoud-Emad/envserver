@@ -27,7 +27,7 @@ func TestReadConfigFromString(t *testing.T) {
 		config, err := ReadConfigFromString(fileContent)
 		assert.NoError(t, err)
 
-		expected := Configuration{
+		expected := Config{
 			Database: databaseExpectation(),
 			Server:   serverExpectation(),
 		}
@@ -75,7 +75,7 @@ func TestReadConfigFromReader(t *testing.T) {
 		config, err := ReadConfigFromReader(reader)
 		assert.NoError(t, err)
 
-		expected := Configuration{
+		expected := Config{
 			Database: databaseExpectation(),
 			Server:   serverExpectation(),
 		}
@@ -85,8 +85,8 @@ func TestReadConfigFromReader(t *testing.T) {
 }
 
 // The expected database struct, used for testing.
-func databaseExpectation() DatabaseConfiguration {
-	return DatabaseConfiguration{
+func databaseExpectation() DatabaseConfig {
+	return DatabaseConfig{
 		Port:     5432,
 		Host:     "localhost",
 		Name:     "postgres",
@@ -96,8 +96,8 @@ func databaseExpectation() DatabaseConfiguration {
 }
 
 // The expected server struct, used for testing.
-func serverExpectation() ServerConfiguration {
-	return ServerConfiguration{
+func serverExpectation() ServerConfig {
+	return ServerConfig{
 		Port: 8080,
 		Host: "localhost",
 	}
