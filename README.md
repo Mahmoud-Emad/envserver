@@ -23,10 +23,10 @@ For detailed information on configuring the envserver project, refer to the [Pro
 
 ## Makefile Commands
 
-- `build`: This command builds the project by compiling the `cmd/server.go` file.
-- `run`: This command first builds the project by invoking the build command, and then it runs the built executable file `./server`.
+- `build`: This command builds the project by compiling the `cmd/envserver.go` file.
+- `run`: This command first builds the project by invoking the build command, and then runs the executable with the specified config file using `./envserver -config ${config_file}`, Running make run config=config.toml will execute the run command with the specified config file.
 - `test`: This command first builds the project by invoking the build command, and then it runs all the tests in the project using the go test command.
-- `clean`: This command will remove the executable file `./server`.
+- `clean`: This command will remove the executable file `./envserver`.
 
 ## Contributing
 

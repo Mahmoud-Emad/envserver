@@ -1,8 +1,10 @@
+config ?= ""
+
 build:
 	go build cmd/envserver.go
 
 run: build
-	./envserver
+	./envserver -config $(config)
 
 test: build
 	go clean -testcache && go test ./...
