@@ -17,6 +17,8 @@ name = "<database_name>"
 [server]
 host = <server_host>
 port = <server_port>
+jwtSecretKey = <jwtSecretKey>
+shutdownTimeout = <shutdownTimeout>
 ```
 
 Replace the placeholder values `<database_host>`, `<database_port>`, `<database_user>`, `<database_password>`, `<database_name>`, and `<server_port>` with the appropriate values see the [config.toml.template](../config.toml.template) .
@@ -29,5 +31,6 @@ Replace the placeholder values `<database_host>`, `<database_port>`, `<database_
 - `<server_host>`           : Replace with the host address of your server (e.g., "localhost").
 - `<server_port>`           : Replace with the desired port number for your server (e.g., 8080).
 - `<jwtSecretKey?>`         : Replace with simple text used as secret key for the jwt token.
+- `<shutdownTimeout?>`?     : To shut down the server in time, replace the value with a simple number, it's optional.
 
 Make sure to save the config.toml file after updating the values.

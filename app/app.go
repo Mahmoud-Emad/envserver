@@ -29,7 +29,7 @@ func initZerolog() {
 }
 
 // NewApp creates a new App instance using the provided configuration file.
-func NewApp(configFileName string) (app *App, err error) {
+func NewApp(configFileName string) (*App, error) {
 	initZerolog()
 
 	config, err := internal.ReadConfigFromFile(configFileName)
@@ -48,7 +48,7 @@ func NewApp(configFileName string) (app *App, err error) {
 
 	err = db.Migrate()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	return &App{
@@ -83,22 +83,21 @@ func (a *App) Start() {
 	<-stop
 
 	// Create a context with a timeout for graceful shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(a.Config.Server.ShutdownTimeout)*time.Second)
 	defer cancel()
 
 	// Shutdown the server
 	if err := server.Shutdown(ctx); err != nil {
 		log.Error().Msgf("Server shutdown error: %v", err)
-	} else {
-		log.Info().Msgf("Server gracefully stopped")
 	}
+	log.Info().Msgf("Server gracefully stopped")
 }
 
 // Define a custom type for the context key to avoid potential collisions with other keys.
 type contextKey int
 
 // Create a new context key to store the user information.
-const UserContextKey contextKey = 1
+const UserContextKey string = "user"
 
 // Get the requested user data.
 func (a *App) GetRequestedUser(r *http.Request) (models.User, error) {
@@ -107,12 +106,12 @@ func (a *App) GetRequestedUser(r *http.Request) (models.User, error) {
 		authHeader := r.Header.Get("Authorization")
 		user, err := VerifyAndDecodeJwtToken(authHeader, a.Config.Server.JWTSecretKey)
 		if err != nil {
-			return user, errors.New("Cannot decode jwt.")
+			return user, errors.New("cannot decode jwt")
 		}
 
 		// Add the user object inside the request.
 		ctx := context.WithValue(r.Context(), UserContextKey, user)
-		r = r.WithContext(ctx)
+		r.WithContext(ctx)
 	}
 	return user, nil
 }
@@ -120,7 +119,6 @@ func (a *App) GetRequestedUser(r *http.Request) (models.User, error) {
 func (a *App) registerHandlers() {
 	r := mux.NewRouter()
 
-	// API version 1 routes
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
