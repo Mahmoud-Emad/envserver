@@ -18,6 +18,8 @@ name = "postgres"
 [server]
 port = 8080
 host = "localhost"
+jwt_secret_key = "xyz"
+shutdown_timeout = 10
 `
 )
 
@@ -46,9 +48,11 @@ name = "postgres"
 [server]
 port = 8080
 host = "localhost"
+jwt_secret_key = "xyz"
+shutdown_timeout = 10
 		`
 		_, err := ReadConfigFromString(fileContent)
-		assert.ErrorIs(t, err, databaseHostKeyError)
+		assert.EqualError(t, err, missingKeyError("database host").Error())
 	})
 
 	t.Run("Validate missing database user key", func(t *testing.T) {
@@ -62,9 +66,11 @@ name = "postgres"
 [server]
 port = 8080
 host = "localhost"
+jwt_secret_key = "xyz"
+shutdown_timeout = 10
 		`
 		_, err := ReadConfigFromString(fileContent)
-		assert.ErrorIs(t, err, databaseUserKeyError)
+		assert.EqualError(t, err, missingKeyError("database user").Error())
 	})
 }
 
@@ -98,7 +104,9 @@ func databaseExpectation() DatabaseConfig {
 // The expected server struct, used for testing.
 func serverExpectation() ServerConfig {
 	return ServerConfig{
-		Port: 8080,
-		Host: "localhost",
+		Port:            8080,
+		Host:            "localhost",
+		JWTSecretKey:    "xyz",
+		ShutdownTimeout: 10,
 	}
 }

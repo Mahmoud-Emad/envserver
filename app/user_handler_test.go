@@ -19,6 +19,8 @@ var configContent = `
 [server]
 host = "localhost"
 port = 8080
+jwt_secret_key = "xyz"
+shutdown_timeout = 10
 
 [database]
 host = "localhost"
@@ -35,7 +37,7 @@ func createConfTempFile(t *testing.T) *os.File {
 	tempFile, err := ioutil.TempFile("", "config.toml")
 	assert.NoError(t, err)
 
-	err = ioutil.WriteFile(tempFile.Name(), []byte(configContent), 0644)
+	err = os.WriteFile(tempFile.Name(), []byte(configContent), 0644)
 	assert.NoError(t, err)
 	return tempFile
 }

@@ -15,8 +15,8 @@ type Config struct {
 type ServerConfig struct {
 	Host            string `toml:"host"`
 	Port            int    `toml:"port"`
-	JWTSecretKey    string `toml:"jwtSecretKey"`
-	ShutdownTimeout int    `toml:"shutdownTimeout"`
+	JWTSecretKey    string `toml:"jwt_secret_key"`
+	ShutdownTimeout int    `toml:"shutdown_timeout"`
 }
 
 type DatabaseConfig struct {
@@ -58,4 +58,34 @@ func ReadConfigFromReader(r io.Reader) (Config, error) {
 		return Config{}, err
 	}
 	return config, nil
+}
+
+func (c *Config) validateConfig() error {
+	requiredFields := []struct {
+		value     string
+		fieldName string
+	}{
+		{c.Server.Host, "server host"},
+		{c.Server.JWTSecretKey, "server jwt secret"},
+		{c.Database.Host, "database host"},
+		{c.Database.Name, "database name"},
+		{c.Database.User, "database user"},
+		{c.Database.Password, "database password"},
+	}
+
+	for _, field := range requiredFields {
+		if strings.TrimSpace(field.value) == "" {
+			return missingKeyError(field.fieldName)
+		}
+	}
+
+	if c.Server.Port == 0 {
+		return missingKeyError("server port")
+	}
+
+	if c.Database.Port == 0 {
+		return missingKeyError("database port")
+	}
+
+	return nil
 }

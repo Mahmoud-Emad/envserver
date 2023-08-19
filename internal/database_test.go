@@ -11,6 +11,8 @@ var configContent = `
 [server]
 host = "localhost"
 port = 8080
+jwt_secret_key = "xyz"
+shutdown_timeout = 10
 
 [database]
 host = "localhost"
