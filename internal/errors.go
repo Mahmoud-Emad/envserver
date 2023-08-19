@@ -14,8 +14,9 @@ var (
 	databaseNameKeyError     = errors.New("The database name key is missing in the config file.")
 	databaseUserKeyError     = errors.New("The database user key is missing in the config file.")
 	databasePasswordKeyError = errors.New("The database password key is missing in the config file.")
-	cantLoadConfigFileError  = errors.New("Failed to open config file.")
-	cantDecodeConfigError    = errors.New("Failed to decode config from reader.")
+
+	cantLoadConfigFileError = errors.New("Failed to open config file, Please make sure that you have a config file called config.toml in your main root, please see the ./config.toml.template")
+	cantDecodeConfigError   = errors.New("Failed to decode config from reader.")
 
 	InternalServerError     = errors.New("Something went wrong")
 	UserEmailNotUniqueError = errors.New("The user email field must be unique.")
@@ -53,4 +54,8 @@ func (c *Configuration) validateConfiguration() error {
 	}
 
 	return nil
+}
+
+func missingKeyError(keyName string) {
+
 }
