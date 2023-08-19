@@ -11,8 +11,8 @@ import (
 func (a *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse request data
 	var fields internal.SigninInputs
-	err := json.NewDecoder(r.Body).Decode(&fields)
-	if err != nil {
+
+	if err := json.NewDecoder(r.Body).Decode(&fields); err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Invalid request payload", nil, err)
 		return
 	}
@@ -35,7 +35,8 @@ func (a *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 		"id":    user.ID,
 		"email": user.Email,
 	}
-	token := GenerateJwtToken(payload, a.Config.Server.JWTSecretKey)
+
+	token, err := GenerateJwtToken(payload, a.Config.Server.JWTSecretKey)
 
 	if err != nil {
 		sendJSONResponse(w, http.StatusInternalServerError, "Failed to generate JWT token", nil, err)
@@ -88,6 +89,17 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the email is already taken
 	found, err := a.DB.GetUserByEmail(fields.Email)
+
+	if err != nil {
+		sendJSONResponse(
+			w, http.StatusBadRequest,
+			"Failed to create user object.",
+			nil,
+			err,
+		)
+		return
+	}
+
 	if found.Email == fields.Email {
 		sendJSONResponse(
 			w, http.StatusBadRequest,

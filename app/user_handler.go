@@ -1,10 +1,10 @@
 package app
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/Mahmoud-Emad/envserver/internal"
 	"github.com/gorilla/mux"
 )
 
@@ -17,12 +17,16 @@ func (a *App) deleteUserByIDHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID from the path parameters
 	vars := mux.Vars(r)
 	if len(vars) == 0 {
-		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the user id.", nil, errors.New("User id should be provided."))
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the user id.", nil, internal.UserIdNotProvidedError)
 	}
 	userIDStr := vars["id"]
 	// Convert the user ID to uint
-	u64, err := strconv.ParseUint(userIDStr, 10, 32)
-	uID := uint(u64)
+	convertedUserId, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert user id to number.", nil, err)
+	}
+
+	uID := uint(convertedUserId)
 
 	// Check if the user exists
 	_, err = a.DB.GetUserByID(uID)

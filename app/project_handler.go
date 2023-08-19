@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -26,13 +25,18 @@ func (a *App) getProjectsHandler(w http.ResponseWriter, r *http.Request) {
 func (a *App) deleteProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	if len(vars) == 0 {
-		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the project id.", nil, errors.New("Project id should be provided."))
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the project id.", nil, internal.ProjectIdNotProvidedError)
 		return
 	}
 
 	projectIDStr := vars["id"]
-	u64, err := strconv.ParseUint(projectIDStr, 10, 32)
-	uID := uint(u64)
+	convertedProjectId, err := strconv.ParseUint(projectIDStr, 10, 32)
+
+	if err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert project id to number.", nil, err)
+	}
+
+	uID := uint(convertedProjectId)
 
 	project, err := a.DB.GetProjectByID(uID)
 	if err != nil {
@@ -48,13 +52,18 @@ func (a *App) deleteProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 func (a *App) getProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	if len(vars) == 0 {
-		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the project id.", nil, errors.New("Project id should be provided."))
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot get the project id.", nil, internal.ProjectIdNotProvidedError)
 		return
 	}
 
 	projectIDStr := vars["id"]
-	u64, err := strconv.ParseUint(projectIDStr, 10, 32)
-	uID := uint(u64)
+	convertedProjectId, err := strconv.ParseUint(projectIDStr, 10, 32)
+
+	if err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert project id to number.", nil, err)
+	}
+
+	uID := uint(convertedProjectId)
 
 	project, err := a.DB.GetProjectByID(uID)
 	if err != nil {

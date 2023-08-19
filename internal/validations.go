@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 )
@@ -17,7 +16,7 @@ func ValidateUserFields(user *SignUpInputs) error {
 			value := v.Field(i).Interface()
 			// Check if the field value is empty or zero
 			if reflect.DeepEqual(value, reflect.Zero(field.Type).Interface()) {
-				return errors.New(fmt.Sprintf("%s field is required", field.Name))
+				return fmt.Errorf("%s field is required", field.Name)
 			}
 		}
 	}
@@ -35,7 +34,7 @@ func ValidateProjectFields(project *ProjectInputs) error {
 		value := v.Field(i).Interface()
 		// Check if the field value is empty or zero
 		if reflect.DeepEqual(value, reflect.Zero(field.Type).Interface()) {
-			return errors.New(fmt.Sprintf("%s field is required", field.Name))
+			return fmt.Errorf("%s field is required", field.Name)
 		}
 	}
 
