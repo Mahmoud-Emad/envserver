@@ -22,5 +22,4 @@ go.work
 .vscode
 config.toml
 envserver
-go.sum
 cli.go
