@@ -75,7 +75,6 @@ func (a *App) getProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 
 // createProjectHandler creates a new project based on the provided request payload.
 func (a *App) createProjectHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Request Header: ", r.Header)
 	user, err := a.GetRequestedUser(r)
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Requested user not found.", nil, err)

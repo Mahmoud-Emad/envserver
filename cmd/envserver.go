@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	envserver "github.com/Mahmoud-Emad/envserver/app"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -14,15 +14,14 @@ func main() {
 	flag.Parse()
 
 	if configFilePath == "" {
-		fmt.Println("Error: You must provide the path to the Config file using the -config flag.")
+		log.Error().Msgf("Error: You must provide the path to the Config file using the -config flag.")
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	fmt.Println("configFilePath: ", configFilePath)
 	app, err := envserver.NewApp(configFilePath)
 	if err != nil {
-		fmt.Printf("Error creating the app: %s\n", err)
+		log.Error().Msgf("Error creating the app: %s\n", err)
 		os.Exit(1)
 	}
 

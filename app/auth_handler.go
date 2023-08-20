@@ -88,17 +88,7 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the email is already taken
-	found, err := a.DB.GetUserByEmail(fields.Email)
-
-	if err != nil {
-		sendJSONResponse(
-			w, http.StatusBadRequest,
-			"Failed to create user object.",
-			nil,
-			err,
-		)
-		return
-	}
+	found, _ := a.DB.GetUserByEmail(fields.Email)
 
 	if found.Email == fields.Email {
 		sendJSONResponse(
