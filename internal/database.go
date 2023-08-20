@@ -22,7 +22,6 @@ func NewDatabase() Database {
 
 // Connect connects to database server.
 func (d *Database) Connect(dbConfig DatabaseConfig) error {
-	log.Info().Msg("Loading config file.")
 	log.Info().Msg("Connecting to the database.")
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
@@ -70,14 +69,14 @@ func (d *Database) GetUserByEmail(email string) (models.User, error) {
 }
 
 // GetUserByID returns user by its email
-func (d *Database) GetUserByID(id uint) (models.User, error) {
+func (d *Database) GetUserByID(id int) (models.User, error) {
 	var u models.User
 	query := d.db.First(&u, "id = ?", id)
 	return u, query.Error
 }
 
 // GetProjectByID returns user by its email
-func (d *Database) GetProjectByID(id uint) (models.Project, error) {
+func (d *Database) GetProjectByID(id int) (models.Project, error) {
 	var p models.Project
 	query := d.db.First(&p, "id = ?", id)
 	return p, query.Error
@@ -106,7 +105,7 @@ func (d *Database) DeleteUserByEmail(email string) error {
 }
 
 // DeleteUserByID deletes a user by their id
-func (d *Database) DeleteUserByID(id uint) error {
+func (d *Database) DeleteUserByID(id int) error {
 	result := d.db.Unscoped().Where("id = ?", id).Delete(&models.User{})
 	return result.Error
 }
@@ -124,7 +123,7 @@ func (d *Database) DeleteProjectByName(name string) error {
 }
 
 // DeleteProjectByName deletes a project by it's name
-func (d *Database) DeleteProjectByID(id uint) error {
+func (d *Database) DeleteProjectByID(id int) error {
 	result := d.db.Unscoped().Where("id = ?", id).Delete(&models.Project{})
 	return result.Error
 }

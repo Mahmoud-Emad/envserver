@@ -36,7 +36,7 @@ func (a *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 		"email": user.Email,
 	}
 
-	token, err := GenerateJwtToken(payload, a.Config.Server.JWTSecretKey)
+	token, err := a.GenerateJwtToken(payload, a.Config.Server.JWTSecretKey)
 
 	if err != nil {
 		sendJSONResponse(w, http.StatusInternalServerError, "Failed to generate JWT token", nil, err)

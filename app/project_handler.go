@@ -30,15 +30,15 @@ func (a *App) deleteProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	projectIDStr := vars["id"]
-	convertedProjectId, err := strconv.ParseUint(projectIDStr, 10, 32)
+	convertedProjectId, err := strconv.ParseInt(projectIDStr, 10, 64)
 
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert project id to number.", nil, err)
 	}
 
-	uID := uint(convertedProjectId)
+	uId := int(convertedProjectId)
 
-	project, err := a.DB.GetProjectByID(uID)
+	project, err := a.DB.GetProjectByID(uId)
 	if err != nil {
 		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project with id %s.", projectIDStr), nil, err)
 		return
@@ -57,15 +57,15 @@ func (a *App) getProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	projectIDStr := vars["id"]
-	convertedProjectId, err := strconv.ParseUint(projectIDStr, 10, 32)
+	convertedProjectId, err := strconv.ParseInt(projectIDStr, 10, 64)
 
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert project id to number.", nil, err)
 	}
 
-	uID := uint(convertedProjectId)
+	uId := int(convertedProjectId)
 
-	project, err := a.DB.GetProjectByID(uID)
+	project, err := a.DB.GetProjectByID(uId)
 	if err != nil {
 		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project with id %s.", projectIDStr), nil, err)
 		return

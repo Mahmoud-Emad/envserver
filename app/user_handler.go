@@ -21,22 +21,22 @@ func (a *App) deleteUserByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	userIDStr := vars["id"]
 	// Convert the user ID to uint
-	convertedUserId, err := strconv.ParseUint(userIDStr, 10, 32)
+	convertedUserId, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert user id to number.", nil, err)
 	}
 
-	uID := uint(convertedUserId)
+	uId := int(convertedUserId)
 
 	// Check if the user exists
-	_, err = a.DB.GetUserByID(uID)
+	_, err = a.DB.GetUserByID(uId)
 	if err != nil {
 		sendJSONResponse(w, http.StatusNotFound, "User not found", nil, err)
 		return
 	}
 
 	// Delete the user from the database
-	err = a.DB.DeleteUserByID(uID)
+	err = a.DB.DeleteUserByID(uId)
 	if err != nil {
 		sendJSONResponse(w, http.StatusInternalServerError, "Failed to delete user", nil, err)
 		return

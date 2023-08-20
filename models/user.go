@@ -9,7 +9,7 @@ import (
 // User struct holds data of users
 type User struct {
 	gorm.Model
-	ID             uint       `gorm:"primaryKey"`
+	ID             int        `gorm:"primaryKey"`
 	Name           string     `json:"name" binding:"required"`
 	Email          string     `json:"email" gorm:"unique" binding:"required"`
 	HashedPassword []byte     `json:"hashed_password" binding:"required"`

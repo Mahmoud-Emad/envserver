@@ -57,14 +57,14 @@ func (a *App) wrapRequest(h http.HandlerFunc, protected bool) http.HandlerFunc {
 			// Check if the request includes a JWT token in the "Authorization" header.
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				http.Error(w, "Unauthorized: JWT token missing", http.StatusUnauthorized)
+				sendJSONResponse(w, http.StatusUnauthorized, "Unauthorized: JWT token missing", nil, nil)
 				return
 			}
 
 			// Validate and decode the JWT token.
-			user, err := VerifyAndDecodeJwtToken(authHeader, a.Config.Server.JWTSecretKey)
+			user, err := a.VerifyAndDecodeJwtToken(authHeader, a.Config.Server.JWTSecretKey)
 			if err != nil {
-				http.Error(w, "Unauthorized: Invalid JWT token", http.StatusUnauthorized)
+				sendJSONResponse(w, http.StatusUnauthorized, "Unauthorized: Invalid JWT token", nil, err)
 				return
 			}
 
@@ -110,23 +110,20 @@ func (a *App) authenticateMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// Define a custom type for the context key to avoid potential collisions with other keys.
-type contextKey int
+type contextKey string
 
-// Create a new context key to store the user information.
-const UserContextKey string = "user"
+const UserContextKey contextKey = "user"
 
 // Get the requested user data.
 func (a *App) GetRequestedUser(r *http.Request) (models.User, error) {
 	user, ok := r.Context().Value(UserContextKey).(models.User)
 	if !ok {
 		authHeader := r.Header.Get("Authorization")
-		user, err := VerifyAndDecodeJwtToken(authHeader, a.Config.Server.JWTSecretKey)
+		user, err := a.VerifyAndDecodeJwtToken(authHeader, a.Config.Server.JWTSecretKey)
 		if err != nil {
 			return user, errors.New("cannot decode jwt")
 		}
 
-		// Add the user object inside the request.
 		ctx := context.WithValue(r.Context(), UserContextKey, user)
 		r.WithContext(ctx)
 	}

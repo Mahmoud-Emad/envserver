@@ -119,7 +119,7 @@ func TestDeleteUserByIDHandler(t *testing.T) {
 		app, err := NewApp(tempFile.Name())
 		assert.NoError(t, err)
 
-		user, err := VerifyAndDecodeJwtToken(userToken, app.Config.Server.JWTSecretKey)
+		user, err := app.VerifyAndDecodeJwtToken(userToken, app.Config.Server.JWTSecretKey)
 		assert.NoError(t, err)
 		assert.NotEqual(t, user.ID, 0)
 
