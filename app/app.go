@@ -30,11 +30,13 @@ func initZerolog() {
 func NewApp(configFileName string) (*App, error) {
 	initZerolog()
 
+	log.Info().Msg("Loading config file.")
 	config, err := internal.ReadConfigFromFile(configFileName)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		return nil, err
 	}
+	log.Info().Msg("Config file loaded.")
 
 	server := NewServer(config.Server.Host, config.Server.Port)
 	db := internal.NewDatabase()
