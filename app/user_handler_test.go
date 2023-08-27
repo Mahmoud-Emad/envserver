@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -34,7 +33,7 @@ var userToken = ""
 
 // Create a temporary file
 func createConfTempFile(t *testing.T) *os.File {
-	tempFile, err := ioutil.TempFile("", "config.toml")
+	tempFile, err := os.CreateTemp("", "config.toml")
 	assert.NoError(t, err)
 
 	err = os.WriteFile(tempFile.Name(), []byte(configContent), 0644)

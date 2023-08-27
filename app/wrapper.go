@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -14,34 +13,19 @@ import (
 )
 
 type Response struct {
-	Message string        `json:"message"`
-	Status  int           `json:"status"`
-	Data    interface{}   `json:"data"`
-	Error   *ErrorDetails `json:"error,omitempty"`
+	Message string      `json:"message"`
+	Status  int         `json:"status"`
+	Data    interface{} `json:"data"`
 }
 
-type ErrorDetails struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-type ResponeError error
 type Handler func(w http.ResponseWriter, r *http.Request)
 
 func sendJSONResponse(w http.ResponseWriter, status int, message string, data interface{}, err error) {
 
-	errDetails := &ErrorDetails{}
 	response := Response{
 		Status:  status,
 		Message: message,
 		Data:    data,
-	}
-
-	if err != nil {
-		log.Error().Msg(fmt.Sprintf("%v", err))
-		errDetails.Code = status
-		errDetails.Message = err.Error()
-		response.Error = errDetails
 	}
 
 	w.Header().Set("Content-Type", "application/json")
