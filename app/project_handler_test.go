@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	internal "github.com/Mahmoud-Emad/envserver/internal"
+	models "github.com/Mahmoud-Emad/envserver/models"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
@@ -140,6 +141,54 @@ func TestProjectHandlers(t *testing.T) {
 		responseRecorder := httptest.NewRecorder()
 		app.getProjectByIDHandler(responseRecorder, request)
 		assert.Equal(t, responseRecorder.Result().StatusCode, http.StatusNotFound)
+	})
+
+	t.Run("Test success update project", func(t *testing.T) {
+		app, err := NewApp(tempFile.Name())
+		assert.NoError(t, err)
+
+		user, err := app.VerifyAndDecodeJwtToken(userToken, app.Config.Server.JWTSecretKey)
+		assert.NoError(t, err)
+		assert.NotEqual(t, user.ID, 0)
+
+		p := models.Project{
+			Name: "createProjectForTest",
+		}
+
+		err = app.DB.CreateProject(&p)
+		assert.NoError(t, err)
+
+		project, err := app.DB.GetProjectByName(p.Name)
+		assert.NoError(t, err)
+
+		p.Name = "testUpdatedProject"
+		url := fmt.Sprintf("/%s/%d", projectsEndpoint, project.ID)
+
+		jsonPayload, err := json.Marshal(p)
+		assert.NoError(t, err)
+
+		request := httptest.NewRequest(http.MethodPut, url, strings.NewReader(string(jsonPayload)))
+		request = mux.SetURLVars(request, map[string]string{"id": fmt.Sprint(project.ID)})
+
+		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set("Authorization", userToken)
+
+		responseRecorder := httptest.NewRecorder()
+		app.updateProjectHandler(responseRecorder, request)
+		assert.Equal(t, responseRecorder.Result().StatusCode, http.StatusOK)
+
+		var responseBody map[string]interface{}
+		err = json.NewDecoder(responseRecorder.Body).Decode(&responseBody)
+		assert.NoError(t, err)
+
+		// Check if the "data" field exists and is a map
+		data, found := responseBody["data"].(map[string]interface{})
+		assert.True(t, found, "Data field not found in the response body")
+		assert.Equal(t, data["name"], p.Name)
+
+		// Delete created project.
+		err = app.DB.DeleteProjectByName(p.Name)
+		assert.NoError(t, err)
 	})
 
 	t.Run("Test fail to create project", func(t *testing.T) {

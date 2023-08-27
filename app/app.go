@@ -114,6 +114,7 @@ func (a *App) registerHandlers() {
 	projectRouter.HandleFunc("", a.wrapRequest(a.getProjectsHandler, true)).Methods(http.MethodGet, http.MethodOptions)
 	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.getProjectByIDHandler, true)).Methods(http.MethodGet, http.MethodOptions)
 	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.deleteProjectByIDHandler, true)).Methods(http.MethodDelete, http.MethodOptions)
+	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.updateProjectHandler, true)).Methods(http.MethodPut, http.MethodOptions)
 
 	// Add the authentication middleware to the protected routes
 	userRouter.Use(a.authenticateMiddleware)

@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var projectFields internal.ProjectInputs
+
 // getProjectsHandler retrieves a list of projects from the database and sends the response as JSON.
 func (a *App) getProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	projects, err := a.DB.GetProjects()
@@ -81,8 +83,7 @@ func (a *App) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var fields internal.ProjectInputs
-	err = json.NewDecoder(r.Body).Decode(&fields)
+	err = json.NewDecoder(r.Body).Decode(&projectFields)
 
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Invalid request payload", nil, err)
@@ -90,7 +91,7 @@ func (a *App) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate user data
-	err = internal.ValidateProjectFields(&fields)
+	err = internal.ValidateProjectFields(&projectFields)
 	if err != nil {
 		sendJSONResponse(
 			w, http.StatusBadRequest,
@@ -103,7 +104,7 @@ func (a *App) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create new project object.
 	project := models.Project{
-		Name:  fields.Name,
+		Name:  projectFields.Name,
 		Owner: user.ID,
 		Team:  []*models.User{},
 		Keys:  []*models.EnvironmentKey{},
@@ -120,7 +121,44 @@ func (a *App) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
+
+	projectFields = internal.ProjectInputs{}
 	// Return success response
 	sendJSONResponse(w, http.StatusCreated, "Project created successfully", project, nil)
 	// TODO, Make the project unique on the user and the env type -> [test, dev..etc]
+}
+
+func (a *App) updateProjectHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse project ID from URL parameters
+	vars := mux.Vars(r)
+	projectIDStr := vars["id"]
+	convertedProjectId, err := strconv.ParseInt(projectIDStr, 10, 64)
+	if err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert project id to number.", nil, err)
+	}
+
+	projectID := int(convertedProjectId)
+	var updatedProject models.Project
+
+	err = json.NewDecoder(r.Body).Decode(&updatedProject)
+	if err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, "Invalid request body", nil, err)
+		return
+	}
+
+	existingProject, err := a.DB.GetProjectByID(projectID)
+	if err != nil {
+		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project with id %s.", projectIDStr), nil, err)
+		return
+	}
+
+	existingProject = updatedProject
+	existingProject.ID = projectID
+
+	err = a.DB.UpdateProject(existingProject)
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, "Failed to update project", nil, err)
+		return
+	}
+	sendJSONResponse(w, http.StatusOK, "Project updated successfully", existingProject, nil)
 }

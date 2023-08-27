@@ -68,18 +68,32 @@ func (d *Database) GetUserByEmail(email string) (models.User, error) {
 	return u, query.Error
 }
 
-// GetUserByID returns user by its email
+// GetUserByID returns user by its id
 func (d *Database) GetUserByID(id int) (models.User, error) {
 	var u models.User
 	query := d.db.First(&u, "id = ?", id)
 	return u, query.Error
 }
 
-// GetProjectByID returns user by its email
+// GetProjectByID returns project by its id
 func (d *Database) GetProjectByID(id int) (models.Project, error) {
 	var p models.Project
 	query := d.db.First(&p, "id = ?", id)
 	return p, query.Error
+}
+
+// UpdateProject returns user by its id
+func (d *Database) UpdateProject(project models.Project) error {
+	err := d.db.Model(&models.Project{}).Where("id = ?", project.ID).Updates(
+		models.Project{
+			Name:            project.Name,
+			EnvironmentName: project.EnvironmentName,
+			Team:            project.Team,
+			Owner:           project.Owner,
+			ID:              project.ID,
+			Keys:            project.Keys,
+		}).Error
+	return err
 }
 
 // GetUsers returns a list of all user records
