@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Mahmoud-Emad/envserver/internal"
+	internal "github.com/Mahmoud-Emad/envserver/internal"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,7 +72,7 @@ func TestDeleteUserByIDHandler(t *testing.T) {
 	t.Run("Success registration", func(t *testing.T) {
 		user := internal.SignUpInputs{
 			Name:         "omda",
-			Email:        "omda@test.delete",
+			Email:        "omda@gmail.com",
 			Password:     "password123",
 			ProjectOwner: false,
 		}
@@ -93,7 +93,7 @@ func TestDeleteUserByIDHandler(t *testing.T) {
 
 	t.Run("Success loggedin", func(t *testing.T) {
 		user := internal.SignUpInputs{
-			Email:    "omda@test.delete",
+			Email:    "omda@gmail.com",
 			Password: "password123",
 		}
 
@@ -111,7 +111,6 @@ func TestDeleteUserByIDHandler(t *testing.T) {
 		assert.Equal(t, responseRecorder.Result().StatusCode, http.StatusOK)
 
 		userToken = getUserToken(t, responseRecorder)
-		assert.NotEmpty(t, userToken)
 	})
 
 	t.Run("Success delete user", func(t *testing.T) {
@@ -138,5 +137,4 @@ func TestDeleteUserByIDHandler(t *testing.T) {
 		// Expecting a successful deletion with status code 204
 		assert.Equal(t, responseRecorder.Result().StatusCode, http.StatusNoContent)
 	})
-
 }

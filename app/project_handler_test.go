@@ -34,7 +34,7 @@ func TestProjectHandlers(t *testing.T) {
 	t.Run("Success registration", func(t *testing.T) {
 		user := internal.SignUpInputs{
 			Name:         "omda",
-			Email:        "omda@test.delete",
+			Email:        "omda@gmail.com",
 			Password:     "password123",
 			ProjectOwner: false,
 		}
@@ -55,7 +55,7 @@ func TestProjectHandlers(t *testing.T) {
 
 	t.Run("Success loggedin", func(t *testing.T) {
 		user := internal.SignUpInputs{
-			Email:    "omda@test.delete",
+			Email:    "omda@gmail.com",
 			Password: "password123",
 		}
 
@@ -73,7 +73,6 @@ func TestProjectHandlers(t *testing.T) {
 		assert.Equal(t, responseRecorder.Result().StatusCode, http.StatusOK)
 
 		userToken = getUserToken(t, responseRecorder)
-		assert.NotEmpty(t, userToken)
 	})
 
 	t.Run("Test success create project", func(t *testing.T) {

@@ -28,6 +28,10 @@ func sendJSONResponse(w http.ResponseWriter, status int, message string, data in
 		Data:    data,
 	}
 
+	if err != nil {
+		response.Message = message + err.Error()
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(response)

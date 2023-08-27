@@ -73,16 +73,14 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Hash the user password
-	mdPassHash := internal.HashMD5(fields.Password)
-	hashedPassword, err := internal.EncryptAES([]byte(fields.Password), mdPassHash)
-
+	hashedPassword, err := internal.HashPassword(fields.Password)
 	if err != nil {
 		sendJSONResponse(
-			w, http.StatusBadRequest,
-			"Failed to create user object.",
+			w,
+			http.StatusBadRequest,
+			"Error hashing password:",
 			nil,
-			internal.InternalServerError,
+			err,
 		)
 		return
 	}
