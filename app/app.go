@@ -100,6 +100,7 @@ func (a *App) registerHandlers() {
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	projectRouter := apiRouter.PathPrefix("/projects").Subrouter()
+	envRouter := apiRouter.PathPrefix("/projects").Subrouter()
 
 	// User routes (protected with authentication)
 	userRouter.HandleFunc("", a.wrapRequest(a.getUsersHandler, true)).Methods(http.MethodGet, http.MethodOptions)
@@ -116,6 +117,9 @@ func (a *App) registerHandlers() {
 	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.deleteProjectByIDHandler, true)).Methods(http.MethodDelete, http.MethodOptions)
 	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.updateProjectHandler, true)).Methods(http.MethodPut, http.MethodOptions)
 
+	// Project env routes (protected with auth)
+	envRouter.HandleFunc("/{id}/env", a.wrapRequest(a.getProjectEnvHandler, true)).Methods(http.MethodGet, http.MethodOptions)
+	envRouter.HandleFunc("/{id}/env", a.wrapRequest(a.createProjectEnvHandler, true)).Methods(http.MethodPost, http.MethodOptions)
 	// Add the authentication middleware to the protected routes
 	userRouter.Use(a.authenticateMiddleware)
 	projectRouter.Use(a.authenticateMiddleware)

@@ -104,9 +104,9 @@ func (d *Database) GetUsers() ([]models.User, error) {
 	return users, result.Error
 }
 
-// GetUsers returns a list of all project records
+// GetProjects returns a list of all project records
 func (d *Database) GetProjects() ([]models.Project, error) {
-	// Retrieve all users
+	// Retrieve all projects
 	var projects []models.Project
 	result := d.db.Find(&projects)
 	return projects, result.Error
@@ -169,4 +169,12 @@ func (d *Database) GetEnvKeyByKeyName(keyName string) (models.EnvironmentKey, er
 	var env models.EnvironmentKey
 	query := d.db.First(&env, "key = ?", keyName)
 	return env, query.Error
+}
+
+// GetEnvKeyByKeyName returns user by its key name
+func (d *Database) GetEnvKeysAndValuesById(id int) ([]models.EnvironmentKey, error) {
+	// Retrieve all project env keys/values
+	var env []models.EnvironmentKey
+	result := d.db.Find(&env).Where("project_id = ?", id)
+	return env, result.Error
 }

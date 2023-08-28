@@ -38,9 +38,9 @@ func (a *App) deleteProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert project id to number.", nil, err)
 	}
 
-	uId := int(convertedProjectId)
+	pId := int(convertedProjectId)
 
-	project, err := a.DB.GetProjectByID(uId)
+	project, err := a.DB.GetProjectByID(pId)
 	if err != nil {
 		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project with id %s.", projectIDStr), nil, err)
 		return
@@ -65,9 +65,9 @@ func (a *App) getProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(w, http.StatusBadRequest, "Cannot convert project id to number.", nil, err)
 	}
 
-	uId := int(convertedProjectId)
+	pId := int(convertedProjectId)
 
-	project, err := a.DB.GetProjectByID(uId)
+	project, err := a.DB.GetProjectByID(pId)
 	if err != nil {
 		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project with id %s.", projectIDStr), nil, err)
 		return
@@ -91,7 +91,7 @@ func (a *App) createProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate user data
-	err = internal.ValidateProjectFields(&projectFields)
+	err = projectFields.Validate()
 	if err != nil {
 		sendJSONResponse(
 			w, http.StatusBadRequest,

@@ -18,3 +18,8 @@ type SigninInputs struct {
 type ProjectInputs struct {
 	Name string `json:"name"`
 }
+
+type EnvironmentKeyInputs struct {
+	Key   string
+	Value string
+}

@@ -7,40 +7,44 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// ValidateUser checks for the presence of required fields in the user struct.
-func ValidateUserFields(user *SignUpInputs) error {
-	t := reflect.TypeOf(*user)
-	v := reflect.ValueOf(*user)
+type Validatable interface {
+	Validate() error
+}
 
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
+func ValidateFields(v Validatable) error {
+	rv := reflect.ValueOf(v).Elem()
+	rt := rv.Type()
+
+	for i := 0; i < rt.NumField(); i++ {
+		field := rt.Field(i)
 		if field.Name != "ProjectOwner" {
-			value := v.Field(i).Interface()
+			// ProjectOwner will be taken from the requested user
+			value := rv.Field(i).Interface()
+
 			// Check if the field value is empty or zero
 			if reflect.DeepEqual(value, reflect.Zero(field.Type).Interface()) {
 				return fmt.Errorf("%s field is required", field.Name)
 			}
+
 		}
 	}
 
 	return nil
 }
 
+// ValidateUser checks for the presence of required fields in the user struct.
+func (s *SignUpInputs) Validate() error {
+	return ValidateFields(s)
+}
+
+// ValidateProjectEnv checks for the presence of required fields in the env inputs struct.
+func (e *EnvironmentKeyInputs) Validate() error {
+	return ValidateFields(e)
+}
+
 // ValidateProjectFields checks for the presence of required fields in the project struct.
-func ValidateProjectFields(project *ProjectInputs) error {
-	t := reflect.TypeOf(*project)
-	v := reflect.ValueOf(*project)
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		value := v.Field(i).Interface()
-		// Check if the field value is empty or zero
-		if reflect.DeepEqual(value, reflect.Zero(field.Type).Interface()) {
-			return fmt.Errorf("%s field is required", field.Name)
-		}
-	}
-
-	return nil
+func (p *ProjectInputs) Validate() error {
+	return ValidateFields(p)
 }
 
 // HashPassword hashes the given plain-text password using bcrypt.

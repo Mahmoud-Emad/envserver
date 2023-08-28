@@ -19,7 +19,7 @@ type Project struct {
 type EnvironmentKey struct {
 	gorm.Model
 	ID        int `gorm:"primaryKey"`
-	ProjectID int
+	ProjectID int `json:"project_id" binding:"required"`
 	Key       string
 	Value     []byte
 }

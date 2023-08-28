@@ -8,6 +8,8 @@ import (
 	models "github.com/Mahmoud-Emad/envserver/models"
 )
 
+var userFields internal.SignUpInputs
+
 func (a *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse request data
 	var fields internal.SigninInputs
@@ -53,8 +55,7 @@ func (a *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 // If the request is invalid or encounters an error, it returns an appropriate error response.
 func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse request data
-	var fields internal.SignUpInputs
-	err := json.NewDecoder(r.Body).Decode(&fields)
+	err := json.NewDecoder(r.Body).Decode(&userFields)
 
 	if err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, "Invalid request payload", nil, err)
@@ -62,7 +63,7 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate user data
-	err = internal.ValidateUserFields(&fields)
+	err = userFields.Validate()
 	if err != nil {
 		sendJSONResponse(
 			w, http.StatusBadRequest,
@@ -73,7 +74,7 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashedPassword, err := internal.HashPassword(fields.Password)
+	hashedPassword, err := internal.HashPassword(userFields.Password)
 	if err != nil {
 		sendJSONResponse(
 			w,
@@ -86,9 +87,9 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the email is already taken
-	found, _ := a.DB.GetUserByEmail(fields.Email)
+	found, _ := a.DB.GetUserByEmail(userFields.Email)
 
-	if found.Email == fields.Email {
+	if found.Email == userFields.Email {
 		sendJSONResponse(
 			w, http.StatusBadRequest,
 			"Failed to create user object.",
@@ -100,11 +101,11 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create the user object
 	user := models.User{
-		Name:           fields.Name,
-		Email:          fields.Email,
+		Name:           userFields.Name,
+		Email:          userFields.Email,
 		HashedPassword: hashedPassword,
 		Projects:       []*models.Project{},
-		IsOwner:        fields.ProjectOwner,
+		IsOwner:        userFields.ProjectOwner,
 	}
 
 	// Save the user in the database
