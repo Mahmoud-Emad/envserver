@@ -62,7 +62,7 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"The project id should be provided.",
+			"response error.",
 			nil,
 			internal.ProjectIdNotProvidedError,
 		)
