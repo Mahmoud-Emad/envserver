@@ -76,7 +76,7 @@ func (a *App) Start() {
 		if err := http.ListenAndServe(fmt.Sprintf("%s:%d", a.Server.Host, a.Server.Port), nil); err != nil && err != http.ErrServerClosed {
 			log.Error().Msgf("Server failed to start: %v", err)
 		}
-		log.Info().Msg("Stopped serving new connections")
+		log.Fatal().Msg("Stopped serving new connections")
 	}()
 
 	// Wait for the shutdown signal

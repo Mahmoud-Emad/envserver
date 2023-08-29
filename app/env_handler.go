@@ -62,10 +62,11 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"Cannot find the project by the provided ID.",
+			"The project id should be provided.",
 			nil,
 			internal.ProjectIdNotProvidedError,
 		)
+		return
 	}
 
 	projectIDStr := vars["id"]
@@ -79,6 +80,19 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 			nil,
 			err,
 		)
+		return
+	}
+
+	_, err = a.DB.GetProjectByID(int(convertedProjectId))
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"The project does not exist",
+			nil,
+			err,
+		)
+		return
 	}
 
 	err = json.NewDecoder(r.Body).Decode(&envFields)
@@ -135,6 +149,6 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	envFields = internal.EnvironmentKeyInputs{}
 	sendJSONResponse(w, http.StatusCreated, "Project environment created successfully", env, nil)
-
 }
