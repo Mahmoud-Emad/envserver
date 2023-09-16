@@ -46,7 +46,12 @@ func (a *App) deleteProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.DB.DeleteProjectByID(project.ID)
+	err = a.DB.DeleteProjectByID(project.ID)
+
+	if err != nil {
+		sendJSONResponse(w, http.StatusNotFound, "Error while deleting project", nil, err)
+		return
+	}
 	sendJSONResponse(w, http.StatusNoContent, "Project deleted successfully", nil, nil)
 }
 
@@ -72,6 +77,7 @@ func (a *App) getProjectByIDHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project with id %s.", projectIDStr), nil, err)
 		return
 	}
+	fmt.Println(project.Keys)
 	sendJSONResponse(w, http.StatusOK, "Project found successfully", project, nil)
 }
 
@@ -155,7 +161,7 @@ func (a *App) updateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	existingProject = updatedProject
 	existingProject.ID = projectID
 
-	err = a.DB.UpdateProject(existingProject)
+	err = a.DB.UpdateProject(&existingProject)
 	if err != nil {
 		sendJSONResponse(w, http.StatusInternalServerError, "Failed to update project", nil, err)
 		return

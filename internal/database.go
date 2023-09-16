@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -89,18 +90,41 @@ func (d *Database) GetProjectEnvByID(id int) (models.EnvironmentKey, error) {
 	return e, query.Error
 }
 
-// UpdateProject updates a prject object by its ID.
-func (d *Database) UpdateProject(project models.Project) error {
-	err := d.db.Model(&models.Project{}).Where("id = ?", project.ID).Updates(
-		models.Project{
-			Name:            project.Name,
-			EnvironmentName: project.EnvironmentName,
-			Team:            project.Team,
-			Owner:           project.Owner,
-			ID:              project.ID,
-			Keys:            project.Keys,
-		}).Error
-	return err
+// UpdateProject updates a project object by its ID.
+func (d *Database) UpdateProject(project *models.Project) error {
+	// First, check if the project with the given ID exists.
+	existingProject := &models.Project{}
+	if err := d.db.First(existingProject, project.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("project with ID %d not found", project.ID)
+		}
+		return err
+	}
+
+	// Update the fields you want to change.
+	existingProject.Name = project.Name
+	existingProject.EnvironmentName = project.EnvironmentName
+	existingProject.Team = project.Team
+	existingProject.Owner = project.Owner
+
+	// Clear the existing keys association to avoid any conflicts.
+	if err := d.db.Model(existingProject).Association("Keys").Clear(); err != nil {
+		return err
+	}
+
+	// Add the new keys to the project.
+	if len(project.Keys) > 0 {
+		if err := d.db.Model(existingProject).Association("Keys").Append(project.Keys); err != nil {
+			return err
+		}
+	}
+
+	// Save the changes.
+	if err := d.db.Save(existingProject).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // UpdateProjectEnvironment updates project environment by its iD.
@@ -155,9 +179,23 @@ func (d *Database) DeleteProjectByName(name string) error {
 	return result.Error
 }
 
-// DeleteProjectByName deletes a project by it's name
+// DeleteProjectByID deletes a project by it's ID
 func (d *Database) DeleteProjectByID(id int) error {
+	p, err := d.GetProjectByID(id)
+	if err != nil {
+		return err
+	}
+
+	keys := p.Keys
+	d.db.Model(&p).Association("Keys").Clear()
+	p.Keys = keys
 	result := d.db.Unscoped().Where("id = ?", id).Delete(&models.Project{})
+	return result.Error
+}
+
+// DeleteProjectEnvByID deletes a project env by it's ID
+func (d *Database) DeleteProjectEnvByID(id int) error {
+	result := d.db.Unscoped().Where("id = ?", id).Delete(&models.EnvironmentKey{})
 	return result.Error
 }
 

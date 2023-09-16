@@ -178,7 +178,7 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = a.DB.GetProjectByID(int(convertedProjectId))
+	project, err := a.DB.GetProjectByID(int(convertedProjectId))
 	if err != nil {
 		sendJSONResponse(
 			w,
@@ -206,7 +206,8 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 	err = envFields.Validate()
 	if err != nil {
 		sendJSONResponse(
-			w, http.StatusBadRequest,
+			w,
+			http.StatusBadRequest,
 			"Please ensure that all mandatory fields have been filled out",
 			nil,
 			err,
@@ -226,7 +227,7 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create new project object.
+	// Create new project environment object.
 	env := models.EnvironmentKey{
 		Key:       envFields.Key,
 		Value:     hashedValue,
@@ -238,6 +239,19 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w, http.StatusBadRequest,
 			"Failed to create project environment object",
+			nil,
+			err,
+		)
+		return
+	}
+
+	// Update the project's keys.
+	project.Keys = append(project.Keys, &env)
+	err = a.DB.UpdateProject(&project)
+	if err != nil {
+		sendJSONResponse(
+			w, http.StatusBadRequest,
+			"Failed to update project object",
 			nil,
 			err,
 		)
@@ -308,4 +322,67 @@ func (a *App) getProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	sendJSONResponse(w, http.StatusOK, "Project environment updated successfully", existingEnv, nil)
+}
+
+// deleteProjectEnvKeyValueHandler is an endpoint to delete the env object by providing the object ID.
+func (a *App) deleteProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if len(vars) == 0 {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"The request variables have no items",
+			nil,
+			internal.ProjectIdNotProvidedError,
+		)
+	}
+
+	projectIDStr := vars["projectID"]
+	convertedProjectId, err := strconv.ParseInt(projectIDStr, 10, 64)
+
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Cannot convert project id to number",
+			nil,
+			err,
+		)
+		return
+	}
+
+	_, err = a.DB.GetProjectByID(int(convertedProjectId))
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusNotFound,
+			fmt.Sprintf("Failed to retrieve project with id %s", projectIDStr),
+			nil,
+			err,
+		)
+		return
+	}
+
+	envIDStr := vars["envID"]
+	convertedEnvId, err := strconv.ParseInt(envIDStr, 10, 64)
+
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Cannot convert env object id to number",
+			nil,
+			err,
+		)
+		return
+	}
+
+	existingEnv, err := a.DB.GetProjectEnvByID(int(convertedEnvId))
+	if err != nil {
+		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project environment with id %s", envIDStr), nil, err)
+		return
+	}
+
+	a.DB.DeleteProjectEnvByID(existingEnv.ID)
+	sendJSONResponse(w, http.StatusNoContent, "Project environment deleted successfully", nil, nil)
 }
