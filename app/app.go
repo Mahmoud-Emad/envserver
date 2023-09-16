@@ -120,6 +120,7 @@ func (a *App) registerHandlers() {
 	// Project env routes (protected with auth)
 	envRouter.HandleFunc("/{id}/env", a.wrapRequest(a.getProjectEnvHandler, true)).Methods(http.MethodGet, http.MethodOptions)
 	envRouter.HandleFunc("/{id}/env", a.wrapRequest(a.createProjectEnvHandler, true)).Methods(http.MethodPost, http.MethodOptions)
+	envRouter.HandleFunc("/{projectID}/env/{envID}", a.wrapRequest(a.updateProjectEnvKeyValueHandler, true)).Methods(http.MethodPut, http.MethodOptions)
 	// Add the authentication middleware to the protected routes
 	userRouter.Use(a.authenticateMiddleware)
 	projectRouter.Use(a.authenticateMiddleware)

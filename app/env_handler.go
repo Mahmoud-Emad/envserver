@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -19,7 +20,7 @@ func (a *App) getProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"Cannot find the project by the provided ID.",
+			"The request variables have no items.",
 			nil,
 			internal.ProjectIdNotProvidedError,
 		)
@@ -55,6 +56,100 @@ func (a *App) getProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 	sendJSONResponse(w, http.StatusOK, "Project environment found successfully", env, nil)
 }
 
+// updateProjectEnvKeyValueHandler is an endpoint to update the key/value of an exist key in the database by providing the object ID.
+func (a *App) updateProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if len(vars) == 0 {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"The request variables have no items.",
+			nil,
+			internal.ProjectIdNotProvidedError,
+		)
+	}
+
+	projectIDStr := vars["projectID"]
+	convertedProjectId, err := strconv.ParseInt(projectIDStr, 10, 64)
+
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Cannot convert project id to number.",
+			nil,
+			err,
+		)
+		return
+	}
+
+	_, err = a.DB.GetProjectByID(int(convertedProjectId))
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"The project does not exist.",
+			nil,
+			err,
+		)
+		return
+	}
+
+	envIDStr := vars["envID"]
+	convertedEnvId, err := strconv.ParseInt(envIDStr, 10, 64)
+
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Cannot convert env object id to number.",
+			nil,
+			err,
+		)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&envFields)
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Invalid request payload",
+			nil,
+			err,
+		)
+		return
+	}
+
+	hashedValue, err := internal.HashPassword(envFields.Value)
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Error hashing value:",
+			nil,
+			err,
+		)
+		return
+	}
+
+	existingEnv, err := a.DB.GetProjectEnvByID(int(convertedEnvId))
+	if err != nil {
+		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project environment with id %s.", envIDStr), nil, err)
+		return
+	}
+
+	existingEnv.Key = envFields.Key
+	existingEnv.Value = hashedValue
+
+	err = a.DB.UpdateProjectEnvironment(existingEnv)
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, "Failed to update project environment.", nil, err)
+		return
+	}
+	sendJSONResponse(w, http.StatusOK, "Project environment updated successfully.", existingEnv, nil)
+}
+
 // Create new env key/value inside a project
 func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -62,7 +157,7 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"response error.",
+			"The request variables have no items.",
 			nil,
 			internal.ProjectIdNotProvidedError,
 		)

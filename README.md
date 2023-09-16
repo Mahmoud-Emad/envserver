@@ -15,7 +15,7 @@ envserver provides a command-line interface (CLI) tool to facilitate key managem
 - add: Adds new environment keys to the local Config file.
 - commit: Commits the changes to the local Config file, providing a commit message. The commit message can be customized and will be updated if conflicts occur.
 
-### Please note that, all of these commands are still under implementation.
+### Please note that, all of these commands are still under implementation
 
 ## Project Config
 
@@ -24,9 +24,28 @@ For detailed information on configuring the envserver project, refer to the [Pro
 ## Makefile Commands
 
 - `build`: This command builds the project by compiling the `cmd/envserver.go` file.
+
+```sh
+make build
+```
+
 - `run`: This command first builds the project by invoking the build command, and then runs the executable with the specified config file using `./envserver -config ${config_file}`, Running make run config=config.toml will execute the run command with the specified config file.
+
+```sh
+make run config='<path_to_config>' # it will exec the make-build also
+```
+
 - `test`: This command first builds the project by invoking the build command, and then it runs all the tests in the project using the go test command.
+
+```sh
+make test
+```
+
 - `clean`: This command will remove the executable file `./envserver`.
+
+```sh
+make clean # remove the build file.
+```
 
 ## Contributing
 

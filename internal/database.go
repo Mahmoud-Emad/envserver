@@ -82,7 +82,14 @@ func (d *Database) GetProjectByID(id int) (models.Project, error) {
 	return p, query.Error
 }
 
-// UpdateProject returns user by its id
+// GetProjectEnvByID returns env object by its ID.
+func (d *Database) GetProjectEnvByID(id int) (models.EnvironmentKey, error) {
+	var e models.EnvironmentKey
+	query := d.db.First(&e, "id = ?", id)
+	return e, query.Error
+}
+
+// UpdateProject updates a prject object by its ID.
 func (d *Database) UpdateProject(project models.Project) error {
 	err := d.db.Model(&models.Project{}).Where("id = ?", project.ID).Updates(
 		models.Project{
@@ -92,6 +99,18 @@ func (d *Database) UpdateProject(project models.Project) error {
 			Owner:           project.Owner,
 			ID:              project.ID,
 			Keys:            project.Keys,
+		}).Error
+	return err
+}
+
+// UpdateProjectEnvironment updates project environment by its iD.
+func (d *Database) UpdateProjectEnvironment(env models.EnvironmentKey) error {
+	err := d.db.Model(&models.Project{}).Where("id = ?", env.ID).Updates(
+		models.EnvironmentKey{
+			Key:       env.Key,
+			ID:        env.ID,
+			ProjectID: env.ProjectID,
+			Value:     env.Value,
 		}).Error
 	return err
 }
