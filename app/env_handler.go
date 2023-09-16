@@ -20,7 +20,7 @@ func (a *App) getProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"The request variables have no items.",
+			"The request variables have no items",
 			nil,
 			internal.ProjectIdNotProvidedError,
 		)
@@ -34,7 +34,7 @@ func (a *App) getProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"Cannot convert project id to number.",
+			"Cannot convert project id to number",
 			nil,
 			err,
 		)
@@ -63,7 +63,7 @@ func (a *App) updateProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Req
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"The request variables have no items.",
+			"The request variables have no items",
 			nil,
 			internal.ProjectIdNotProvidedError,
 		)
@@ -76,7 +76,7 @@ func (a *App) updateProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Req
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"Cannot convert project id to number.",
+			"Cannot convert project id to number",
 			nil,
 			err,
 		)
@@ -87,8 +87,8 @@ func (a *App) updateProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		sendJSONResponse(
 			w,
-			http.StatusBadRequest,
-			"The project does not exist.",
+			http.StatusNotFound,
+			fmt.Sprintf("Failed to retrieve project with id %s", projectIDStr),
 			nil,
 			err,
 		)
@@ -102,7 +102,7 @@ func (a *App) updateProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Req
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"Cannot convert env object id to number.",
+			"Cannot convert env object id to number",
 			nil,
 			err,
 		)
@@ -135,7 +135,7 @@ func (a *App) updateProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Req
 
 	existingEnv, err := a.DB.GetProjectEnvByID(int(convertedEnvId))
 	if err != nil {
-		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project environment with id %s.", envIDStr), nil, err)
+		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project environment with id %s", envIDStr), nil, err)
 		return
 	}
 
@@ -144,10 +144,10 @@ func (a *App) updateProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Req
 
 	err = a.DB.UpdateProjectEnvironment(existingEnv)
 	if err != nil {
-		sendJSONResponse(w, http.StatusInternalServerError, "Failed to update project environment.", nil, err)
+		sendJSONResponse(w, http.StatusInternalServerError, "Failed to update project environment", nil, err)
 		return
 	}
-	sendJSONResponse(w, http.StatusOK, "Project environment updated successfully.", existingEnv, nil)
+	sendJSONResponse(w, http.StatusOK, "Project environment updated successfully", existingEnv, nil)
 }
 
 // Create new env key/value inside a project
@@ -157,7 +157,7 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"The request variables have no items.",
+			"The request variables have no items",
 			nil,
 			internal.ProjectIdNotProvidedError,
 		)
@@ -171,7 +171,7 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
-			"Cannot convert project id to number.",
+			"Cannot convert project id to number",
 			nil,
 			err,
 		)
@@ -182,8 +182,8 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		sendJSONResponse(
 			w,
-			http.StatusBadRequest,
-			"The project does not exist",
+			http.StatusNotFound,
+			fmt.Sprintf("Failed to retrieve project with id %s", projectIDStr),
 			nil,
 			err,
 		)
@@ -207,7 +207,7 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		sendJSONResponse(
 			w, http.StatusBadRequest,
-			"Please ensure that all mandatory fields have been filled out.",
+			"Please ensure that all mandatory fields have been filled out",
 			nil,
 			err,
 		)
@@ -246,4 +246,66 @@ func (a *App) createProjectEnvHandler(w http.ResponseWriter, r *http.Request) {
 
 	envFields = internal.EnvironmentKeyInputs{}
 	sendJSONResponse(w, http.StatusCreated, "Project environment created successfully", env, nil)
+}
+
+// getProjectEnvKeyValueHandler is an endpoint to get the key/value of an exist key in the database by providing the object ID.
+func (a *App) getProjectEnvKeyValueHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if len(vars) == 0 {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"The request variables have no items",
+			nil,
+			internal.ProjectIdNotProvidedError,
+		)
+	}
+
+	projectIDStr := vars["projectID"]
+	convertedProjectId, err := strconv.ParseInt(projectIDStr, 10, 64)
+
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Cannot convert project id to number",
+			nil,
+			err,
+		)
+		return
+	}
+
+	_, err = a.DB.GetProjectByID(int(convertedProjectId))
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusNotFound,
+			fmt.Sprintf("Failed to retrieve project with id %s", projectIDStr),
+			nil,
+			err,
+		)
+		return
+	}
+
+	envIDStr := vars["envID"]
+	convertedEnvId, err := strconv.ParseInt(envIDStr, 10, 64)
+
+	if err != nil {
+		sendJSONResponse(
+			w,
+			http.StatusBadRequest,
+			"Cannot convert env object id to number",
+			nil,
+			err,
+		)
+		return
+	}
+
+	existingEnv, err := a.DB.GetProjectEnvByID(int(convertedEnvId))
+	if err != nil {
+		sendJSONResponse(w, http.StatusNotFound, fmt.Sprintf("Failed to retrieve project environment with id %s", envIDStr), nil, err)
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, "Project environment updated successfully", existingEnv, nil)
 }
