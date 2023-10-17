@@ -1,0 +1,12 @@
+[database]
+host = "<database_host>"
+port = <database_port>
+user = "<database_user>"
+password = "<database_password>"
+name = "<database_name>"
+
+[server]
+host = <local_server_host>
+port = <server_port>
+jwt_secret_key = <jwt_secret_key?> # simple text used as secret key for the jwt token.
+shutdown_timeout = <shutdown_timeout?> # timeout to the server when shutdown.

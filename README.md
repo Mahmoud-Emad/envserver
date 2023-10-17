@@ -1,62 +1,52 @@
-# Jimber
+# Envserver
 
-Jimber is a web-based and CLI tool for managing environment variables for users and teams.
+## Project Description
 
-## Overview
+envserver is a server application that allows users to store and manage environment keys for their projects. It provides a centralized platform for securely storing and accessing environment variables, similar to the functionality provided by tools like `flagsmeth`. With envserver, users can easily store and retrieve environment keys for their projects, enhancing their development workflow.
 
-Jimber allows users to create and manage their own environment variables as well as share variables within their teams. It provides a server backend deployed online and a simple web-based user interface for managing variables. Additionally, it offers a command-line interface (CLI) tool that can be installed via `go get` to interact with the server and manage variables.
+The server application includes a database with two main tables: "User" and "Project". The "User" table handles user registration and login functionality, with each user being assigned a unique token for authentication. The "Project" table is used to manage projects, their teams, and their associated environment variables.
 
-## Features
+## CLI Tool
 
-- User Authentication: Users can register, log in, and manage their accounts.
-- Role-based Permissions: Users have different roles and permissions, allowing for fine-grained access control.
-- Environment Variable Management: Users can create, update, delete, and retrieve their own environment variables.
-- Team Collaboration: Users can share variables within teams and manage team-specific settings.
-- Web-based UI: A user-friendly web-based interface for interacting with the server and managing variables.
-- CLI Tool: A command-line interface (CLI) tool for accessing and managing variables from the command line.
+envserver provides a command-line interface (CLI) tool to facilitate key management for users. The CLI tool offers several commands to interact with the server and manage environment keys effectively. The available commands are:
 
-## Technologies Used
+- pull: Pulls the latest changes from the server and creates or updates the local Config file.
+- push: Pushes the local changes to the server, updating the environment keys.
+- add: Adds new environment keys to the local Config file.
+- commit: Commits the changes to the local Config file, providing a commit message. The commit message can be customized and will be updated if conflicts occur.
 
-- Golang: Backend server and CLI tool development.
-<!-- - [Your chosen web framework]: Web-based UI development.
-- [Your chosen database]: Data storage and management.
-- [Other libraries or dependencies you use]: [List any additional libraries or dependencies used in the project.] -->
+### Please note that, all of these commands are still under implementation
 
-## Installation and Usage
+## Project Config
 
-### Server Setup
+For detailed information on configuring the envserver project, refer to the [Project Config](./docs/Config.md) document. This document provides instructions on setting up the config.toml Config file, which includes important settings such as database connection details and server port.
 
-1. Clone the Jimber repository.
-2. Install the necessary dependencies using `go get`.
-3. Configure the database connection settings in the server configuration file.
-4. Build and run the server using `go run server.go`.
+## Makefile Commands
 
-<!-- ### Web-based UI
+- `build`: This command builds the project by compiling the `cmd/envserver.go` file.
 
-1. Install the required dependencies for the web-based UI (e.g., Node.js, npm or yarn).
-2. Navigate to the `web-ui` directory.
-3. Install the necessary packages using `npm install` or `yarn install`.
-4. Configure the API endpoint in the web UI codebase.
-5. Start the web-based UI development server using `npm start` or `yarn start`. -->
+```sh
+make build
+```
 
-### CLI Tool
+- `run`: This command first builds the project by invoking the build command, and then runs the executable with the specified config file using `./envserver -config ${config_file}`, Running make run config=config.toml will execute the run command with the specified config file.
 
-1. Install the CLI tool by running `go get github.com/Mahmoud-Emad/jimber/cli`.
-2. Create a new jimber project by executing `jimber init`
-3. Authenticate with the server using the CLI tool (`jimber connect`) and follow the prompts.
+```sh
+make run config='<path_to_config>' # it will exec the make-build also
+```
 
-### Commands under implementation
-- pull `pull the changes did by team`
-- push `push the changes you did`
-- add   `add the changes to the head`
-- set   `set new env var`
+- `test`: This command first builds the project by invoking the build command, and then it runs all the tests in the project using the go test command.
 
-<!-- 3. Use the CLI tool commands to manage environment variables (`jimber add`, `jimber get`, etc.). -->
+```sh
+make test
+```
+
+- `clean`: This command will remove the executable file `./envserver`.
+
+```sh
+make clean # remove the build file.
+```
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute to Jimber, please follow the guidelines outlined in [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-[MIT License](LICENSE)
+If you would like to contribute to the envserver project, please refer to the [Contributing Guidelines](./docs/contributing.md) document. It outlines the steps to contribute, including guidelines for reporting issues, suggesting improvements, and submitting pull requests.
