@@ -76,7 +76,7 @@ func (a *App) Start() {
 		if err := http.ListenAndServe(fmt.Sprintf("%s:%d", a.Server.Host, a.Server.Port), nil); err != nil && err != http.ErrServerClosed {
 			log.Error().Msgf("Server failed to start: %v", err)
 		}
-		log.Info().Msg("Stopped serving new connections")
+		log.Fatal().Msg("Stopped serving new connections")
 	}()
 
 	// Wait for the shutdown signal
@@ -100,6 +100,7 @@ func (a *App) registerHandlers() {
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	projectRouter := apiRouter.PathPrefix("/projects").Subrouter()
+	envRouter := apiRouter.PathPrefix("/projects").Subrouter()
 
 	// User routes (protected with authentication)
 	userRouter.HandleFunc("", a.wrapRequest(a.getUsersHandler, true)).Methods(http.MethodGet, http.MethodOptions)
@@ -116,6 +117,12 @@ func (a *App) registerHandlers() {
 	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.deleteProjectByIDHandler, true)).Methods(http.MethodDelete, http.MethodOptions)
 	projectRouter.HandleFunc("/{id}", a.wrapRequest(a.updateProjectHandler, true)).Methods(http.MethodPut, http.MethodOptions)
 
+	// Project env routes (protected with auth)
+	envRouter.HandleFunc("/{id}/env", a.wrapRequest(a.getProjectEnvHandler, true)).Methods(http.MethodGet, http.MethodOptions)
+	envRouter.HandleFunc("/{id}/env", a.wrapRequest(a.createProjectEnvHandler, true)).Methods(http.MethodPost, http.MethodOptions)
+	envRouter.HandleFunc("/{projectID}/env/{envID}", a.wrapRequest(a.updateProjectEnvKeyValueHandler, true)).Methods(http.MethodPut, http.MethodOptions)
+	envRouter.HandleFunc("/{projectID}/env/{envID}", a.wrapRequest(a.getProjectEnvKeyValueHandler, true)).Methods(http.MethodGet, http.MethodOptions)
+	envRouter.HandleFunc("/{projectID}/env/{envID}", a.wrapRequest(a.deleteProjectEnvKeyValueHandler, true)).Methods(http.MethodDelete, http.MethodOptions)
 	// Add the authentication middleware to the protected routes
 	userRouter.Use(a.authenticateMiddleware)
 	projectRouter.Use(a.authenticateMiddleware)
