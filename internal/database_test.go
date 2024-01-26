@@ -74,7 +74,8 @@ func TestDatabaseConnect(t *testing.T) {
 }
 
 func TestUser(t *testing.T) {
-	username := "Mahmoud"
+	FName := "Mahmoud"
+	LName := "Emad"
 	email := "Mahmoud@gmail.com"
 
 	t.Run("create new user object", func(t *testing.T) {
@@ -82,15 +83,17 @@ func TestUser(t *testing.T) {
 
 		db, _ := setupDB(t)
 		err := db.CreateUser(&models.User{
-			Name:     username,
-			Email:    email,
-			Projects: []*models.Project{},
+			FirstName: FName,
+			LastName:  LName,
+			Email:     email,
+			Projects:  []*models.Project{},
 		})
 
 		assert.NoError(t, err)
 		user, err := db.GetUserByEmail(email)
 
-		assert.Equal(t, user.Name, username)
+		assert.Equal(t, user.FirstName, FName)
+		assert.Equal(t, user.LastName, LName)
 		assert.NoError(t, err)
 	})
 
@@ -101,7 +104,8 @@ func TestUser(t *testing.T) {
 		user, err := db.GetUserByEmail(email)
 
 		assert.NoError(t, err)
-		assert.Equal(t, user.Name, username)
+		assert.Equal(t, user.FirstName, FName)
+		assert.Equal(t, user.LastName, LName)
 
 		err = db.DeleteUserByEmail(email)
 		assert.NoError(t, err)

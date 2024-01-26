@@ -34,7 +34,8 @@ func TestProjectHandlers(t *testing.T) {
 
 	t.Run("Success registration", func(t *testing.T) {
 		user := internal.SignUpInputs{
-			Name:         "omda",
+			FirstName:    "omda",
+			LastName:     "Man",
 			Email:        "omda@gmail.com",
 			Password:     "password123",
 			ProjectOwner: false,

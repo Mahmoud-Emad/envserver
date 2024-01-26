@@ -101,7 +101,8 @@ func (a *App) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create the user object
 	user := models.User{
-		Name:           userFields.Name,
+		FirstName:      userFields.FirstName,
+		LastName:       userFields.LastName,
 		Email:          userFields.Email,
 		HashedPassword: hashedPassword,
 		Projects:       []*models.Project{},
