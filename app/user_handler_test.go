@@ -71,7 +71,8 @@ func TestDeleteUserByIDHandler(t *testing.T) {
 
 	t.Run("Success registration", func(t *testing.T) {
 		user := internal.SignUpInputs{
-			Name:         "omda",
+			FirstName:    "omda",
+			LastName:     "man",
 			Email:        "omda@gmail.com",
 			Password:     "password123",
 			ProjectOwner: false,
